@@ -1,0 +1,12 @@
+bibentry(
+    bibtype = "Article",
+    title = "XXX",
+    author = c(
+        person("Zijian", "Ni"),
+        person("Christina", "Kendziorski")),
+    journal = "XXX",
+    year = "2019",
+    volume = XX,
+    pages = XX,
+    doi = "XX"
+)
