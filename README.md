@@ -1,3 +1,3 @@
-# CB2
+# CB2Pack
 
 Under construction.
