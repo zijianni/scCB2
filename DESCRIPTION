@@ -1,0 +1,38 @@
+Package: CB2Pack
+Version: 0.99.1
+Date: 2019/6/20
+Title: XXX
+Authors@R: c(
+    person("Zijian", "Ni", role = c("aut", "cre"), email = "zni25@wisc.edu"), 
+    person("Christina", "Kendziorski", role="ctb"))
+Depends: 
+    R (>= 3.4.0),
+    SingleCellExperiment
+Imports: 
+    S4Vectors,
+    BiocParallel,
+    Rcpp,
+    Matrix,
+    methods,
+    utils,
+    stats,
+    edgeR,
+    rhdf5,
+    HDF5Array,
+    R.utils,
+    dqrng,
+    DropletUtils
+Suggests: 
+    testthat,
+    beachmat,
+    knitr,
+    BiocStyle,
+    rmarkdown
+Description: 
+    XXX
+License: GPL-3
+NeedsCompilation: yes
+VignetteBuilder: knitr
+LinkingTo: Rcpp, beachmat, Rhdf5lib, BH, dqrng
+SystemRequirements: C++11
+RoxygenNote: 6.1.1
