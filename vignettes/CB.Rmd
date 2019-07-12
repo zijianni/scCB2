@@ -28,6 +28,10 @@ CB is an R package for distinguishing real cells from empty droplets in droplet-
 
 #Read count matrix from 10X output
 
+Currently, the most commonly used droplet-based protocol is 10X Chromium. Our package provides handy functions to directly read 10X output files and generate feature-by-barcode count matrix into R. There are public 10X datasets which can be found [here](https://www.10xgenomics.com/resources/datasets). For example, we use  
+
+
+
 The input of CB is a feature(usually genes)-by-barcode count matrix. 
 
 #Run CB to distinguish real cells from empty droplets
