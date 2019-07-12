@@ -1,3 +1,3 @@
-# CB2Pack
+# R package 'CB'
 
 Under construction.
