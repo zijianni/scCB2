@@ -1,0 +1,39 @@
+---
+title: "CB: Identify Real Cells from Empty Droplets Based on Barcodes Clustering"
+author: "Zijian Ni and Christina Kendziorski"
+package: CB
+output: 
+  BiocStyle::html_document
+vignette: >
+  %\VignetteIndexEntry{CB: Identify Real Cells from Empty Droplets Based on Barcodes Clustering}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}  
+---
+
+
+```{r, echo=FALSE, results="hide", message=FALSE}
+require(knitr)
+opts_chunk$set(error=FALSE, message=FALSE, warning=FALSE)
+```
+
+```{r setup, echo=FALSE, message=FALSE}
+library(CB)
+
+
+#Introduction
+
+Droplet-based single cell RNA-seq technologies provide a novel insight in transcriptome profiles of individual cells with a much larger cell numbers and cheaper cost compared with microfluidic-based single cell RNA-seq. During library preparation, each cell is expected to be captured by one droplet. The number of droplets are usually much more than the number of cells, thus most droplets do not contain real cell. However, there are always free-floating RNA fragments in the library due to broken cells or library contamination. Empty droplets will capture them and have non-zero expression values after sequencing.
+
+CB is an R package for distinguishing real cells from empty droplets in droplet-based single cell RNA-seq experiments (especially for 10X Chromium output). It is based on clustering similar barcodes and calculating Monte-Carlo p-value for each cluster to test against background distribution. This cluster-level test outperforms single-barcode-level tests in dealing with low count barcodes and homogeneous sequencing library, while keeping FDR well controlled.
+
+#Read count matrix from 10X output
+
+The input of CB is a feature(usually genes)-by-barcode count matrix. 
+
+#Run CB to distinguish real cells from empty droplets
+
+#Extract real cell matrix
+
+#Downstream analysis
+
+#Session Information
