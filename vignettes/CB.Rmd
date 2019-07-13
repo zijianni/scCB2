@@ -2,6 +2,7 @@
 title: "CB: Identify Real Cells from Empty Droplets Based on Barcodes Clustering"
 author: "Zijian Ni and Christina Kendziorski"
 package: CB
+date: 2019/7/12
 output: 
   BiocStyle::html_document
 vignette: >
@@ -17,27 +18,76 @@ opts_chunk$set(error=FALSE, message=FALSE, warning=FALSE)
 ```
 
 ```{r setup, echo=FALSE, message=FALSE}
-library(CB)
-
+#library(CB)
+```
 
 #Introduction
 
 Droplet-based single cell RNA-seq technologies provide a novel insight in transcriptome profiles of individual cells with a much larger cell numbers and cheaper cost compared with microfluidic-based single cell RNA-seq. During library preparation, each cell is expected to be captured by one droplet. The number of droplets are usually much more than the number of cells, thus most droplets do not contain real cell. However, there are always free-floating RNA fragments in the library due to broken cells or library contamination. Empty droplets will capture them and have non-zero expression values after sequencing.
 
-CB is an R package for distinguishing real cells from empty droplets in droplet-based single cell RNA-seq experiments (especially for 10X Chromium output). It is based on clustering similar barcodes and calculating Monte-Carlo p-value for each cluster to test against background distribution. This cluster-level test outperforms single-barcode-level tests in dealing with low count barcodes and homogeneous sequencing library, while keeping FDR well controlled.
+*CB* is an R package for distinguishing real cells from empty droplets in droplet-based single cell RNA-seq experiments (especially for 10X Chromium output). It is based on clustering similar barcodes and calculating Monte-Carlo p-value for each cluster to test against background distribution. This cluster-level test outperforms single-barcode-level tests in dealing with low count barcodes and homogeneous sequencing library, while keeping FDR well controlled.
 
 #Read count matrix from 10X output
 
-Currently, the most commonly used droplet-based protocol is 10X Chromium. Our package provides handy functions to directly read 10X output files and generate feature-by-barcode count matrix into R. There are public 10X datasets which can be found [here](https://www.10xgenomics.com/resources/datasets). For example, we use  
+Currently, the most commonly used droplet-based protocol is 10X Chromium. Our package provides handy functions to directly read 10X Cell Ranger output files and generate feature-by-barcode count matrix into R. Public 10X datasets can be found [here](https://www.10xgenomics.com/resources/datasets). We use [1k Brain Cells from an E18 Mouse](http://cf.10xgenomics.com/samples/cell-exp/2.1.0/neurons_900/neurons_900_raw_gene_bc_matrices.tar.gz) as the example in this vignette.
 
+```{r}
+data.dir <- "~/CB_example/neurons_900_raw_gene_bc_matrices/raw_gene_bc_matrices/mm10/"
+list.files(data.dir)
+```
 
+The raw data from 10X Cell Ranger output contains "barcodes.tsv", "genes.tsv" ("features.tsv" if Cell Ranger version >=3) and "matrix.mtx". We first read these files into R and generate the feature-by-barcode count matrix.
 
-The input of CB is a feature(usually genes)-by-barcode count matrix. 
+```{r}
+mbrain1k <- Read10X(data.dir)
+str(mbrain1k)
+```
 
-#Run CB to distinguish real cells from empty droplets
+If raw data is not from 10X Chromium pipeline, user may manually create the feature-by-barcode count matrix with rows representing genes and columns representing barcodes. Gene and barcode IDs should be unique. The format of count matrix can be either sparse matrix or standard matrix.
+
+#Run *CB* to distinguish real cells from empty droplets
+
+We use the first 200,000 barcodes to reduce problem size. 
+
+```{r}
+mbrainSub <- mbrain1k[,1:200000]
+```
+
+For readers who haven't downloaded raw data in the previous step, this matrix is also integrated into the package and can be loaded using
+
+```{r}
+data(mbrainSub)
+```
+
+The main function `CBFindCell` takes raw count matrix as input and return real cells, test statistics and p-values. Now we apply `CBFindCell` on `mbrainSub`, controlling FDR at 0.01 level (Default: 0.01), assuming all barcodes with total count less or equals 100 are background empty droplets (Default: 100), using 4 cores parallel computation (Default: number of total cores in the machine minus 2).
+
+```{r}
+CBOut <- CBFindCell(mbrainSub, FDR_threshold = 0.01, 
+                    pooling_threshold = 100, Ncores = 4)
+str(CBOut)
+```
 
 #Extract real cell matrix
 
+If readers are not interested in the output testing information, `GetCellMat` can extract real cell matrix directly from `CBFindCell` output. It also provides a filtering option to remove broken cells based on proportion of mitochondrial gene expressions. Now we apply `GetCellMat` on `CBOut`, filtering out cells whose mitochondrial proportions are greater than 0.05 (Default: 1, No filtering).
+
+```{r}
+RealCell <- GetCellMat(CBOut, MTfilter = 0.05)
+str(RealCell)
+```
+
 #Downstream analysis
 
+After *CB* pre-processing, real cell matrix is still in matrix format, so it can be directly followed by downstream statistical analysis. For example, if we want to use *Seurat* pipeline, we can easily create a Seurat object using
+
+```{r}
+SeuratObj <- Seurat::CreateSeuratObject(RealCell)
+str(SeuratObj)
+```
+
+Now it's ready for downstream analysis such as normalization and cell type clustering.
+
 #Session Information
+```{r}
+sessionInfo()
+```
