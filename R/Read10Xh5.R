@@ -1,7 +1,7 @@
 #' Read 10X output data in hdf5 format
 #'
 #' One-line simple function to read 10X output hdf5 file. Works under both old 
-#' (<3) and new (>=3) CellRanger version.
+#' (<3) and new (>=3) Cell Ranger version.
 #' 
 #' @param h5file The path of 10X output hdf5 file (ended with .h5). 
 #' @param row.name Specify either using gene names (\code{row.name = "name"}) or 
@@ -9,7 +9,7 @@
 #' Default is \code{row.name = "name"}.
 #' @param meta Logical. If \code{TRUE}, returns a list containing both the count matrix
 #' and metadata of genes (features). Metadata includes feature names, IDs and other 
-#' additional information depending on CellRanger output. If \code{FALSE} (default),
+#' additional information depending on Cell Ranger output. If \code{FALSE} (default),
 #' only returns the count matrix.
 #' 
 #' @return If \code{meta = T}, returns a list of two elements: a "dgCMatrix" 
@@ -44,7 +44,7 @@ Read10Xh5 <- function(h5file,
   if (!file.exists(h5file))
     stop("File does not exist.")
   fname <- h5ls(h5file)
-  #check if CellRanger version >=3
+  #check if Cell Ranger version >=3
   V3 <- "/matrix" %in% fname$group
   if (V3) {
     data.temp <-  h5read(h5file, "/matrix")
@@ -77,7 +77,7 @@ Read10Xh5 <- function(h5file,
     }
   } else{
     subname <- fname$name[fname$group == "/"]
-    #CellRanger V2 data might include multiple count matrices
+    #Cell Ranger V2 data might include multiple count matrices
     CountMatList <- vector("list", length(subname))
     names(CountMatList) <- subname
     for (i in seq_along(subname)) {

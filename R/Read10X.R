@@ -1,18 +1,18 @@
 #' Read 10X output data
 #'
 #' One-line simple function to read 10X output data. Works under both old 
-#' (<3) and new (>=3) CellRanger version.
+#' (<3) and new (>=3) Cell Ranger version.
 #' 
-#' @param dir The directory of 10X output data. For CellRanger version <3, 
+#' @param dir The directory of 10X output data. For Cell Ranger version <3, 
 #' directory should include three files: barcodes.tsv, genes.tsv, matrix.mtx. 
-#' For CellRanger version >=3, directory should include three 
+#' For Cell Ranger version >=3, directory should include three 
 #' files: barcodes.tsv.gz, features.tsv.gz, matrix.mtx.gz.
 #' @param row.name Specify either using gene names (\code{row.name = "name"}) or 
 #' gene Ensembl IDs (\code{row.name = "id"}) as row names of the count matrix. 
 #' Default is \code{row.name = "name"}.
 #' @param meta Logical. If \code{TRUE}, returns a list containing both the count matrix
 #' and metadata of genes (features). Metadata includes feature names, IDs and other 
-#' additional information depending on CellRanger output. If \code{FALSE} (default),
+#' additional information depending on Cell Ranger output. If \code{FALSE} (default),
 #' only returns the count matrix.
 #' 
 #' @return If \code{meta = T}, returns a list of two elements: a "dgCMatrix" 
@@ -48,7 +48,7 @@ Read10X <- function(dir,
     stop("Directory does not exist.")
   dir <- gsub("/$", "", dir)
   fname <- list.files(dir)
-  #check if CellRanger version >=3
+  #check if Cell Ranger version >=3
   V3 <- "features.tsv.gz" %in% fname
   if (V3) {
     Barcode <- file.path(dir, "barcodes.tsv.gz")
