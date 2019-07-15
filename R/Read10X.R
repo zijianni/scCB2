@@ -1,6 +1,6 @@
 #' Read 10X output data
 #'
-#' One-line simple function to read 10X output data. Works under both old 
+#' One-line handy function to read 10X Cell Ranger output data. Works under both old 
 #' (<3) and new (>=3) Cell Ranger version.
 #' 
 #' @param dir The directory of 10X output data. For Cell Ranger version <3, 
@@ -10,9 +10,9 @@
 #' @param row.name Specify either using gene names (\code{row.name = "name"}) or 
 #' gene Ensembl IDs (\code{row.name = "id"}) as row names of the count matrix. 
 #' Default is \code{row.name = "name"}.
-#' @param meta Logical. If \code{TRUE}, returns a list containing both the count matrix
+#' @param meta Logical. If \code{T}, returns a list containing both the count matrix
 #' and metadata of genes (features). Metadata includes feature names, IDs and other 
-#' additional information depending on Cell Ranger output. If \code{FALSE} (default),
+#' additional information depending on Cell Ranger output. If \code{F} (default),
 #' only returns the count matrix.
 #' 
 #' @return If \code{meta = T}, returns a list of two elements: a "dgCMatrix" 
@@ -20,7 +20,7 @@
 #' genes (features). For the count matrix, each row is a gene (feature) and 
 #' each column is a barcode.  If \code{meta = F}, only returns the count matrix.
 #' 
-#' @example 
+#' @examples 
 #' \dontrun{
 #' data_dir <- 'path/to/data/directory'
 #' 
@@ -35,7 +35,6 @@
 #' 
 #' @importFrom utils read.delim
 #' @importFrom Matrix readMM
-#' @importFrom Matrix as
 #' 
 #' @export
 

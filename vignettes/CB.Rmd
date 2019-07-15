@@ -18,7 +18,7 @@ opts_chunk$set(error=FALSE, message=FALSE, warning=FALSE)
 ```
 
 ```{r setup, echo=FALSE, message=FALSE}
-#library(CB)
+library(CB)
 ```
 
 #Introduction
@@ -47,23 +47,24 @@ If raw data is not from 10X Chromium pipeline, user may manually create the feat
 
 #Run *CB* to distinguish real cells from empty droplets
 
-We use the first 200,000 barcodes to reduce problem size. 
+We use the first 50,000 barcodes to reduce problem size. 
 
 ```{r}
-mbrainSub <- mbrain1k[,1:200000]
+mbrainSub <- mbrain1k[,1:50000]
 ```
 
 For readers who haven't downloaded raw data in the previous step, this matrix is also integrated into the package and can be loaded using
 
 ```{r}
 data(mbrainSub)
+dim(mbrainSub)
 ```
 
-The main function `CBFindCell` takes raw count matrix as input and return real cells, test statistics and p-values. Now we apply `CBFindCell` on `mbrainSub`, controlling FDR at 0.01 level (Default: 0.01), assuming all barcodes with total count less or equals 100 are background empty droplets (Default: 100), using 4 cores parallel computation (Default: number of total cores in the machine minus 2).
+The main function `CBFindCell` takes raw count matrix as input and return real cells, test statistics and p-values. Now we apply `CBFindCell` on `mbrainSub`, controlling FDR at 0.01 level (Default: 0.01), assuming all barcodes with total count less or equals 100 are background empty droplets (Default: 100), using 2 cores parallel computation (Default: number of total cores in the machine minus 2).
 
 ```{r}
 CBOut <- CBFindCell(mbrainSub, FDR_threshold = 0.01, 
-                    pooling_threshold = 100, Ncores = 4)
+                    pooling_threshold = 100, Ncores = 2)
 str(CBOut)
 ```
 

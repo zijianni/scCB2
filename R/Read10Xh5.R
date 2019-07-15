@@ -1,15 +1,15 @@
 #' Read 10X output data in hdf5 format
 #'
-#' One-line simple function to read 10X output hdf5 file. Works under both old 
+#' One-line handy function to read 10X output hdf5 file. Works under both old 
 #' (<3) and new (>=3) Cell Ranger version.
 #' 
 #' @param h5file The path of 10X output hdf5 file (ended with .h5). 
 #' @param row.name Specify either using gene names (\code{row.name = "name"}) or 
 #' gene Ensembl IDs (\code{row.name = "id"}) as row names of the count matrix. 
 #' Default is \code{row.name = "name"}.
-#' @param meta Logical. If \code{TRUE}, returns a list containing both the count matrix
+#' @param meta Logical. If \code{T}, returns a list containing both the count matrix
 #' and metadata of genes (features). Metadata includes feature names, IDs and other 
-#' additional information depending on Cell Ranger output. If \code{FALSE} (default),
+#' additional information depending on Cell Ranger output. If \code{F} (default),
 #' only returns the count matrix.
 #' 
 #' @return If \code{meta = T}, returns a list of two elements: a "dgCMatrix" 
@@ -17,7 +17,7 @@
 #' genes (features). For the count matrix, each row is a gene (feature) and 
 #' each column is a barcode.  If \code{meta = F}, only returns the count matrix.
 #' 
-#' @example 
+#' @examples 
 #' \dontrun{
 #' data_path <- 'path/to/data/directory/data.h5'
 #' 
@@ -32,7 +32,7 @@
 #' 
 #' @importFrom rhdf5 h5ls
 #' @importFrom rhdf5 h5read
-#' @importFrom Matrix sparseMatrix
+#' @import Matrix
 #' 
 #' @export
 

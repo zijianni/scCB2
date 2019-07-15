@@ -6,7 +6,7 @@ bibentry(
         person("Christina", "Kendziorski")),
     journal = "XXX",
     year = "2019",
-    volume = XX,
-    pages = XX,
+    volume = "XX",
+    pages = "XX",
     doi = "XX"
 )

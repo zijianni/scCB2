@@ -1,22 +1,20 @@
-#' Extract real cell matrix from `CBFindCell` output
+#' Extract real cell matrix from \code{CBFindCell} output
 #' 
-#' Simply function to extract real cell matrix from `CBFindCell` output. It also provides
+#' Handy function to extract real cell matrix from \code{CBFindCell} output. It also provides
 #' the option to filter out broken cells based on proportion of mitochondrial gene expressions.
 #'
-#' @param CBout Output object from `CBFindCell`.
+#' @param CBout Output object from \code{CBFindCell}.
 #' 
-#' @param MTfilter Numeric value between 0 to 1. Mitochondrial gene expression proportion filtering threshold for broken cells. The proportion of mitochondrial gene
+#' @param MTfilter Numeric value between 0 to 1. Default: \code{1} (No filtering). Mitochondrial gene expression proportion filtering threshold for broken cells. The proportion of mitochondrial gene
 #' expressions is calculated from the scaled sum of all genes starting with "MT-" (human) or "mt-" (mouse).
 #'
-#' @param MTgene Character vector. User may use customized mitochondrial gene IDs to perform the filtering. 
+#' @param MTgene Character vector. User may specify customized mitochondrial gene IDs to perform the filtering. 
 #'
-#' @example
+#' @examples
 #' data(mbrainSub)
 #' CBOut <- CBFindCell(mbrainSub, FDR_threshold = 0.01, pooling_threshold = 100, Ncores = 4)
 #' RealCell <- GetCellMat(CBOut, MTfilter = 0.05)
-#' 
-#' @importFrom 
-#' 
+#' str(RealCell)
 #' 
 #' @export
 
@@ -29,13 +27,13 @@ GetCellMat <- function(CBout,
   }
   xmat <- cbind(CBout$cluster_matrix, CBout$cell_matrix)
   if (is.null(MTgene)) {
-    MTgene <- c(grep(pattern = "\\<MT-", CBout = rownames(dat_norm)),
-                grep(pattern = "\\<mt-", CBout = rownames(dat_norm)))
+    MTgene <- c(grep(pattern = "\\<MT-", x = rownames(xmat)),
+                grep(pattern = "\\<mt-", x = rownames(xmat)))
   } else if (!all(is.character(MTgene))) {
     stop("\"MTgene\" should be a character vector of mitochondrial gene names.")
   }
   if (length(MTgene) > 0) {
-    MTprop <- colSums(CBout[MTgene, ]) / colSums(CBout)
+    MTprop <- colSums(xmat[MTgene, ]) / colSums(xmat)
     brokenCell <- MTprop > MTfilter
     xmat <- xmat[, !brokenCell]
   }
