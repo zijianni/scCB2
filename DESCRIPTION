@@ -1,16 +1,16 @@
-Package: CB2Pack
+Package: CB
 Version: 0.99.1
-Date: 2019/6/20
+Date: 2019/7/14
 Title: XXX
 Authors@R: c(
     person("Zijian", "Ni", role = c("aut", "cre"), email = "zni25@wisc.edu"), 
     person("Christina", "Kendziorski", role="ctb"))
 Depends: 
-    R (>= 3.4.0),
-    SingleCellExperiment
+    R (>= 3.5.0),
 Imports: 
     S4Vectors,
     BiocParallel,
+    SingleCellExperiment,
     Rcpp,
     Matrix,
     methods,
@@ -21,7 +21,11 @@ Imports:
     HDF5Array,
     R.utils,
     dqrng,
-    DropletUtils
+    DropletUtils,
+    parallel,
+    doParallel,
+    iterators,
+    foreach
 Suggests: 
     testthat,
     beachmat,
@@ -29,10 +33,10 @@ Suggests:
     BiocStyle,
     rmarkdown
 Description: 
-    XXX
+    An R package for distinguishing real cells from empty droplets in droplet-based single cell RNA-seq experiments (especially for 10X Chromium output). It is based on clustering similar barcodes and calculating Monte-Carlo p-value for each cluster to test against background distribution. This cluster-level test outperforms single-barcode-level tests in dealing with low count barcodes and homogeneous sequencing library, while keeping FDR well controlled.
 License: GPL-3
 NeedsCompilation: yes
 VignetteBuilder: knitr
-LinkingTo: Rcpp, beachmat, Rhdf5lib, BH, dqrng
+Encoding: UTF-8
 SystemRequirements: C++11
 RoxygenNote: 6.1.1
