@@ -2,25 +2,29 @@
 % Please edit documentation in R/GetCellMat.R
 \name{GetCellMat}
 \alias{GetCellMat}
-\title{Extract real cell matrix from \code{CBFindCell} output}
+\title{Extract real cell matrix from \code{CB2FindCell} output}
 \usage{
 GetCellMat(CBout, MTfilter = 1, MTgene = NULL)
 }
 \arguments{
-\item{CBout}{Output object from \code{CBFindCell}.}
+\item{CBout}{Output object from \code{CB2FindCell}.}
 
 \item{MTfilter}{Numeric value between 0 to 1. Default: \code{1} (No filtering). Mitochondrial gene expression proportion filtering threshold for broken cells. The proportion of mitochondrial gene
 expressions is calculated from the scaled sum of all genes starting with "MT-" (human) or "mt-" (mouse).}
 
 \item{MTgene}{Character vector. User may specify customized mitochondrial gene IDs to perform the filtering.}
 }
+\value{
+A \code{dgCMatrix} count matrix of real cells.
+}
 \description{
-Handy function to extract real cell matrix from \code{CBFindCell} output. It also provides
+Handy function to extract real cell matrix from \code{CB2FindCell} output. It also provides
 the option to filter out broken cells based on proportion of mitochondrial gene expressions.
 }
 \examples{
 data(mbrainSub)
-CBOut <- CBFindCell(mbrainSub, FDR_threshold = 0.01, pooling_threshold = 100, Ncores = 4)
+CBOut <- CB2FindCell(mbrainSub, FDR_threshold = 0.01,
+    background_threshold = 100, Ncores = 2)
 RealCell <- GetCellMat(CBOut, MTfilter = 0.05)
 str(RealCell)
 

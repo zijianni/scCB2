@@ -1,7 +1,7 @@
 #' Subset of 1k Brain Cells from an E18 Mouse
 #'
 #' 1k Brain Cells from an E18 Mouse is a public dataset from 10X Genomics.
-#' This subset is the first 200,000 barcodes of original data. 
+#' This subset is the first 50,000 barcodes of original data. 
 #'
 #' @docType data
 #'

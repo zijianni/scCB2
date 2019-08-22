@@ -2,46 +2,62 @@
 % Please edit documentation in R/Read10X.R
 \name{Read10X}
 \alias{Read10X}
+\alias{Read10Xh5}
 \title{Read 10X output data}
 \usage{
-Read10X(dir, row.name = "name", meta = F)
+Read10X(dir = NULL, row.name = "name", meta = FALSE)
+
+Read10Xh5(h5file, row.name = "name", meta = FALSE)
 }
 \arguments{
-\item{dir}{The directory of 10X output data. For Cell Ranger version <3, 
-directory should include three files: barcodes.tsv, genes.tsv, matrix.mtx. 
-For Cell Ranger version >=3, directory should include three 
+\item{dir}{The directory of 10X output data. For Cell Ranger version <3,
+directory should include three files: barcodes.tsv, genes.tsv, matrix.mtx.
+For Cell Ranger version >=3, directory should include three
 files: barcodes.tsv.gz, features.tsv.gz, matrix.mtx.gz.}
 
-\item{row.name}{Specify either using gene names (\code{row.name = "name"}) or 
-gene Ensembl IDs (\code{row.name = "id"}) as row names of the count matrix. 
+\item{row.name}{Specify either using gene names (\code{row.name = "name"}) or
+gene Ensembl IDs (\code{row.name = "id"}) as row names of the count matrix.
 Default is \code{row.name = "name"}.}
 
-\item{meta}{Logical. If \code{T}, returns a list containing both the count matrix
-and metadata of genes (features). Metadata includes feature names, IDs and other 
-additional information depending on Cell Ranger output. If \code{F} (default),
+\item{meta}{Logical. If \code{TRUE}, returns a list containing both the count matrix
+and metadata of genes (features). Metadata includes feature names, IDs and other
+additional information depending on Cell Ranger output. If \code{FALSE} (default),
 only returns the count matrix.}
+
+\item{h5file}{The path of 10X output HDF5 file (ended with .h5).}
 }
 \value{
-If \code{meta = T}, returns a list of two elements: a "dgCMatrix" 
-sparse matrix containing expression counts and a data frame containing metadata of 
-genes (features). For the count matrix, each row is a gene (feature) and 
-each column is a barcode.  If \code{meta = F}, only returns the count matrix.
+If \code{meta = TRUE}, returns a list of two elements: a "dgCMatrix"
+sparse matrix containing expression counts and a data frame containing metadata of
+genes (features). For the count matrix, each row is a gene (feature) and
+each column is a barcode.  If \code{meta = FALSE}, only returns the count matrix.
 }
 \description{
-One-line handy function to read 10X Cell Ranger output data. Works under both old 
-(<3) and new (>=3) Cell Ranger version.
+\code{Read10X} is a one-line handy function for reading 10X Cell Ranger output data, producing a 
+count matrix for input to \code{CB2FindCell}. \code{Read10Xh5} is for reading 10X Cell Ranger output
+HDF5 file (ended with .h5).  Works under both old (<3) and new (>=3) Cell Ranger version.
 }
 \examples{
-\dontrun{
-data_dir <- 'path/to/data/directory'
 
-#count matrix
-data_mat <- Read10X(data.dir = data_dir)
-str(data_mat)
 
-#a list including count matrix and feature metadata
-data_list <- Read10X(data.dir = data_dir, meta = T)
-str(data_list)
-}
+#simulate 10X output files
+data(mbrainSub)
+dir.create(file.path(tempdir(),"CB2example"))
+data_dir <- file.path(tempdir(),"CB2example")
+gene_name <- rownames(mbrainSub)
+#For simplicity, use gene names to generate gene IDs to fit the format.
+gene_id <- paste0("ENSG_fake_",gene_name)
+barcode_id <- colnames(mbrainSub)
+Matrix::writeMM(mbrainSub,file = file.path(data_dir,"matrix.mtx"))
+write.table(barcode_id,file = file.path(data_dir,"barcodes.tsv"),
+    sep = "\\t", quote = FALSE, col.names = FALSE, row.names = FALSE)
+write.table(cbind(gene_id,gene_name),file = file.path(data_dir,"genes.tsv"),
+    sep = "\\t", quote = FALSE, col.names = FALSE, row.names = FALSE)
+
+#read files
+list.files(data_dir)
+mbrainSub_new <- Read10X(data_dir)
+str(mbrainSub_new)
+identical(mbrainSub, mbrainSub_new)
 
 }
