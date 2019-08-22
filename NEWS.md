@@ -1,3 +1,3 @@
-## CB 0.99.1
+## scCB2 0.99.0
 ---------------------
 * Created initial github page.
