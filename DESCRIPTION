@@ -1,37 +1,43 @@
-Package: CB
-Version: 0.99.1
-Date: 2019/7/14
-Title: XXX
+Package: scCB2
+Version: 0.99.13
+Date: 2019/9/22
+Title: CB2: A cluster-based approach for distinguishing cells from background barcodes in 10X Genomics Data 
 Authors@R: c(
     person("Zijian", "Ni", role = c("aut", "cre"), email = "zni25@wisc.edu"), 
-    person("Christina", "Kendziorski", role="ctb"))
+    person("Christina", "Kendziorski", role="ctb"),
+    person("Shuyang", "Chen", role="ctb"))
 Depends: 
-    R (>= 3.5.0),
+    R (>= 3.6.0)
 Imports: 
-    S4Vectors,
-    BiocParallel,
     SingleCellExperiment,
-    Rcpp,
     Matrix,
     methods,
     utils,
     stats,
     edgeR,
     rhdf5,
-    HDF5Array,
-    R.utils,
-    dqrng,
-    DropletUtils,
     parallel,
+    DropletUtils,
     doParallel,
     iterators,
     foreach
 Suggests: 
-    testthat,
+    testthat (>= 2.1.0),
+    Seurat,
+    KernSmooth,
     beachmat,
     knitr,
     BiocStyle,
     rmarkdown
+biocViews:
+    DataImport,
+    RNASeq,
+    SingleCell,
+    Sequencing,
+    GeneExpression,
+    Transcriptomics,
+    Preprocessing,
+    Clustering
 Description: 
     An R package for distinguishing real cells from empty droplets in droplet-based single cell RNA-seq experiments (especially for 10X Chromium output). It is based on clustering similar barcodes and calculating Monte-Carlo p-value for each cluster to test against background distribution. This cluster-level test outperforms single-barcode-level tests in dealing with low count barcodes and homogeneous sequencing library, while keeping FDR well controlled.
 License: GPL-3
