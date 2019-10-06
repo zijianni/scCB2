@@ -3,27 +3,30 @@
 #' 
 #' @title Read 10X output data
 #'
-#' @description \code{Read10X} is a one-line handy function for reading 10X Cell Ranger output data, producing a 
-#' count matrix for input to \code{CB2FindCell}. \code{Read10Xh5} is for reading 10X Cell Ranger output
-#' HDF5 file (ended with .h5).  Works under both old (<3) and new (>=3) Cell Ranger version.
+#' @description \code{Read10X} is a one-line handy function for reading 
+#' 10X Cell Ranger output data, producing a count matrix for input to 
+#' \code{CB2FindCell}. \code{Read10Xh5} is for reading 10X Cell Ranger output
+#' HDF5 file (ended with .h5).  Works under both old (<3) and new (>=3) 
+#' Cell Ranger version.
 #'
 #' @param dir The directory of 10X output data. For Cell Ranger version <3,
 #' directory should include three files: barcodes.tsv, genes.tsv, matrix.mtx.
 #' For Cell Ranger version >=3, directory should include three
 #' files: barcodes.tsv.gz, features.tsv.gz, matrix.mtx.gz.
 #' @param h5file The path of 10X output HDF5 file (ended with .h5).
-#' @param row.name Specify either using gene names (\code{row.name = "name"}) or
-#' gene Ensembl IDs (\code{row.name = "id"}) as row names of the count matrix.
-#' Default is \code{row.name = "name"}.
-#' @param meta Logical. If \code{TRUE}, returns a list containing both the count matrix
-#' and metadata of genes (features). Metadata includes feature names, IDs and other
-#' additional information depending on Cell Ranger output. If \code{FALSE} (default),
-#' only returns the count matrix.
+#' @param row.name Specify either using gene names (\code{row.name = "name"}) 
+#' or gene Ensembl IDs (\code{row.name = "id"}) as row names of the count 
+#' matrix. Default is \code{row.name = "name"}.
+#' @param meta Logical. If \code{TRUE}, returns a list containing both the 
+#' count matrix and metadata of genes (features). Metadata includes feature 
+#' names, IDs and other additional information depending on Cell Ranger 
+#' output. If \code{FALSE} (default), only returns the count matrix.
 #'
-#' @return If \code{meta = TRUE}, returns a list of two elements: a "dgCMatrix"
-#' sparse matrix containing expression counts and a data frame containing metadata of
-#' genes (features). For the count matrix, each row is a gene (feature) and
-#' each column is a barcode.  If \code{meta = FALSE}, only returns the count matrix.
+#' @return If \code{meta = TRUE}, returns a list of two elements: a 
+#' "dgCMatrix" sparse matrix containing expression counts and a data 
+#' frame containing metadata of genes (features). For the count matrix, 
+#' each row is a gene (feature) and each column is a barcode.  If 
+#' \code{meta = FALSE}, only returns the count matrix.
 #'
 #' @examples
 #' 
@@ -59,7 +62,7 @@ Read10X <- function(dir = NULL,
                     row.name = "name",
                     meta = FALSE) {
     if(is.null(dir)){
-      dir <- getwd()
+        dir <- getwd()
     }
     if (!row.name %in% c("name", "id"))
         stop("row.name should be either \"name\" or \"id\".")

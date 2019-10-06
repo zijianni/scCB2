@@ -1,59 +1,85 @@
-#' Distinguish real cells from empty droplets using clustering-based Monte-Carlo test.
+#' Distinguish real cells from empty droplets using clustering-based 
+#' Monte-Carlo test.
 #'
-#' The main function of \code{scCB2} package. Distinguish real cells from empty droplets 
-#' using clustering-based Monte-Carlo test. 
+#' The main function of \code{scCB2} package. Distinguish real cells 
+#' from empty droplets using clustering-based Monte-Carlo test. 
 #'
-#' @param RawDat Matrix. Supports standard matrix or sparse matrix. This is the raw feature-by-barcode count matrix.
+#' @param RawDat Matrix. Supports standard matrix or sparse matrix. 
+#' This is the raw feature-by-barcode count matrix.
 #' 
-#' @param FDR_threshold Numeric between 0 and 1. Default: 0.01. The False Discovery Rate (FDR) to be controlled for multiple testing.
+#' @param FDR_threshold Numeric between 0 and 1. Default: 0.01. 
+#' The False Discovery Rate (FDR) to be controlled for multiple testing.
 #' 
-#' @param background_threshold Positive integer. Default: 100. All barcodes whose total count below or equal to this threshold
-#' are defined as background empty droplets. They will be used to estimate the background distribution. The remaining barcodes
-#' will be test against background distribution. If sequencing depth is deliberately made higher (lower)
-#' than usual, this threshold can be leveled up (down) correspondingly to get reasonable number of cells.
-#' Recommended sequencing depth for this default threshold: 40,000~80,000 reads per cell.
+#' @param background_threshold Positive integer. Default: 100. All barcodes 
+#' whose total count below or equal to this threshold are defined as 
+#' background empty droplets. They will be used to estimate the background 
+#' distribution. The remaining barcodes will be test against background 
+#' distribution. If sequencing depth is deliberately made higher (lower)
+#' than usual, this threshold can be leveled up (down) correspondingly to 
+#' get reasonable number of cells. Recommended sequencing depth for this 
+#' default threshold: 40,000~80,000 reads per cell.
 #' 
-#' @param RemoveProtein Logical. Default: \code{TRUE}. For 10X Cell Ranger version >=3, extra features (surface proteins) besides genes 
-#' are measured simultaneously. If \code{RemoveProtein = TRUE}, only genes are used for testing. Removing extra features are recommended
-#' because the default pooling threshold (100) is chosen only for handling gene expression. Protein expression level is hugely different
-#' from gene expression level. If using the default pooling threshold while keeping proteins, the estimated background distribution
-#' will be hugely biased and does not reflect the real background distribution of empty droplets.   
+#' @param RemoveProtein Logical. Default: \code{TRUE}. For 10X Cell Ranger 
+#' version >=3, extra features (surface proteins) besides genes 
+#' are measured simultaneously. If \code{RemoveProtein = TRUE}, only genes 
+#' are used for testing. Removing extra features are recommended
+#' because the default pooling threshold (100) is chosen only for handling 
+#' gene expression. Protein expression level is hugely different
+#' from gene expression level. If using the default pooling threshold 
+#' while keeping proteins, the estimated background distribution
+#' will be hugely biased and does not reflect the real background distribution 
+#' of empty droplets.   
 #' 
-#' @param retain Positive integer. Default: \code{NULL}. This is the retain threshold for large barcodes. All barcodes whose
-#' total counts are larger or equal to retain threshold are directly classified as real cells prior to testing. If \code{retain = NULL}, the knee point
-#' of the log rank curve of barcodes total counts will serve as the retain threshold, which is calculated using package
-#' \code{DropletUtils}'s method. If \code{retain = Inf}, no barcodes will be retained prior to testing. If manually specified,
-#' it should be greater than pooling threshold. 
+#' @param retain Positive numeric. Default: \code{NULL}. This is the retain 
+#' threshold for large barcodes. All barcodes whose total counts are larger 
+#' or equal to retain threshold are directly classified as real cells prior 
+#' to testing. If \code{retain = NULL}, the knee point of the log rank curve 
+#' of barcodes total counts will serve as the retain threshold, which is 
+#' calculated using package \code{DropletUtils}'s method. If 
+#' \code{retain = Inf}, no barcodes will be retained prior to testing. 
+#' If manually specified, it should be greater than pooling threshold. 
 #' 
-#' @param Ncores Positive integer. Default: \code{detectCores() - 2}. Number of cores for parallel computation.
+#' @param Ncores Positive integer. Default: \code{detectCores() - 2}. 
+#' Number of cores for parallel computation.
 #' 
-#' @param PrintProg Logical. Default: \code{TRUE}. If \code{PrintProg = TRUE}, progressing messages will be printed.
+#' @param PrintProg Logical. Default: \code{TRUE}. If \code{PrintProg = TRUE}, 
+#' progressing messages will be printed.
 #'
-#' @return A list of (1) real cell barcode matrix distinguished during cluster-level test, (2) real cell barcode matrix
-#' distinguished during single-barcode-level test, (3) testing statistics (Pearson correlation to the background) 
-#' for all candidate barcode clusters, (4) barcode IDs for all candidate barcode clusters, the name of each cluster is its median 
-#' barcode size, (5) testing statistics (log likelihood under background distribution) for remaining single barcodes not clustered,
-#' (6) estimated background distribution count vector.
+#' @return A list of (1) real cell barcode matrix distinguished during 
+#' cluster-level test, (2) real cell barcode matrix 
+#' distinguished during single-barcode-level 
+#' test plus large cells who exceed retain threshold, (3) testing statistics 
+#' (Pearson correlation to the background) for all candidate barcode clusters, 
+#' (4) barcode IDs for all candidate barcode clusters, the name of each cluster 
+#' is its median barcode size, (5) testing statistics 
+#' (log likelihood under background distribution) for remaining single 
+#' barcodes not clustered, (6) background distribution count vector,
+#' without Good-Turing correction.
 #' 
 #' @details 
 #' 
-#' Input data is a feature-by-barcode matrix. Background barcodes are defined based
-#' on \code{background_threshold}. Large barcodes are automatically treated as real cells
-#' based on \code{retain}. Remaining barcodes will be first clustered into subgroups, then 
-#' tested against background using Monte-Carlo p-values simulated from Multinomial distribution.
-#' The rest barcodes will be further tested using EmptyDrops (Aaron T. L. Lun \emph{et. al. 2019}).
+#' Input data is a feature-by-barcode matrix. Background barcodes are 
+#' defined based on \code{background_threshold}. Large barcodes are 
+#' automatically treated as real cells based on \code{retain}. Remaining 
+#' barcodes will be first clustered into subgroups, then 
+#' tested against background using Monte-Carlo p-values simulated from 
+#' Multinomial distribution. The rest barcodes will be further tested 
+#' using EmptyDrops (Aaron T. L. Lun \emph{et. al. 2019}).
 #' FDR is controlled based on \code{FDR_threshold}.
 #' 
 #' This function supports parallel computation. \code{Ncores} is used to specify
 #' number of cores. 
 #' 
-#' Under CellRanger version >=3, extra features other than genes are simultaneously measured 
-#' (e.g. surface protein). We recommend filtering them out using \code{RemoveProtein = TRUE}
-#' because the measurement of protein abundance is not in the same level as gene expression counts.
-#' If using the default pooling threshold while keeping proteins, the estimated background distribution
-#' will be hugely biased and does not reflect the real background distribution of empty droplets.
-#' The resulting matrix will contain lots of barcodes who have almost zero gene expression
-#' and relatively high protein expression, which are usually not useful for RNA-Seq study.
+#' Under CellRanger version >=3, extra features other than genes are 
+#' simultaneously measured (e.g. surface protein). We recommend filtering 
+#' them out using \code{RemoveProtein = TRUE} because the measurement of 
+#' protein abundance is not in the same level as gene expression counts.
+#' If using the default pooling threshold while keeping proteins, the 
+#' estimated background distribution will be hugely biased and does not 
+#' reflect the real background distribution of empty droplets. The resulting 
+#' matrix will contain lots of barcodes who have almost zero gene expression
+#' and relatively high protein expression, which are usually not useful for 
+#' RNA-Seq study.
 #' 
 #' @examples
 #' # raw data, all barcodes
@@ -73,7 +99,6 @@
 #' @import parallel
 #' @import SingleCellExperiment
 #' @import Matrix
-#' @importFrom DropletUtils barcodeRanks
 #' @importFrom DropletUtils emptyDrops
 #' @importFrom edgeR goodTuringProportions
 #' @importFrom methods as
@@ -107,74 +132,92 @@ CB2FindCell <- function(RawDat,
     if (Ncores < 1)
         Ncores <- 1
     
-    #############filter 0-expressed genes and barcodes
+    #############filter proteins, 0-expressed genes and barcodes
     if (PrintProg)
-        message("\n(1/5) Filtering empty barcodes and features in raw data...")
+        message("(1/5) Filtering empty barcodes and features in raw data...")
     if (!is(RawDat, "dgCMatrix")) {
         RawDat <- as(RawDat, "dgCMatrix")
     }
     
-    dat_filter <- FilterGB(RawDat)
     if (RemoveProtein) {
-        protein <- grep(pattern = "TotalSeqB", x = rownames(dat_filter))
-        if (length(protein) > 0) {
-            dat_filter <- dat_filter[-protein,]
-        }
+        protein <- grep(pattern = "TotalSeqB", x = rownames(RawDat))
+    }else{
+        protein <- integer(0)
     }
     
+    if (length(protein) > 0) {
+        dat_filter <- FilterGB(RawDat[-protein,],0,0)
+    }else{
+        dat_filter <- FilterGB(RawDat,0,0) 
+    }
+
     if (is.null(retain)) {
-        brank <- barcodeRanks(dat_filter, lower = background_threshold)
         
-        knee <-
-            as.integer(ifelse(is.null(brank$knee),
-                            brank@metadata$knee, brank$knee))
-        
-        if (is.null(knee)) {
-            stop("Failed to calculate knee point. Check input data.")
+        brank <- Calc_retain(dat_filter, lower = background_threshold)
+        #check convergence of knee point
+        repeat{
+            retain_temp <- brank$knee
+            brank <- Calc_retain(dat_filter, brank$inflection + 100)
+            if(brank$knee==retain_temp) break
         }
-        retain <- knee
+        
+        if (is.null(retain_temp)) {
+            stop("Failed to calculate knee point. Probably not enough barcodes.")
+        }
+        retain <- retain_temp
     }
     
+    if (PrintProg) {
+        message("Retain threshold: ", retain)
+    }
     if(retain <= background_threshold){
         stop("Retain threshold should be larger than background threshold.")
     }
     
+    #####Large real cells
     bc <- colSums(dat_filter)
-    if (length(names(which(bc >= retain))) > 0) {
+    if (any(bc >= retain)) {
         retain_cell <- names(bc)[bc >= retain]
         retain_mat <- RawDat[, retain_cell]
+        dat_filter <- FilterGB(dat_filter[,bc < retain], 0, 0)
+    }else{
+        retain_mat <- NULL
     }
-    B0_cell <- names(bc)[bc <= background_threshold]
-    B1_cell <- names(bc)[(bc > background_threshold & bc < retain)]
-    B0 <- dat_filter[, B0_cell]
-    dat <- dat_filter[, B1_cell]
     
-    nzero_gene_B1 <- which(rowSums(dat) > 0)
-    nzero_gene_B0 <- which(rowSums(B0) > 0)
-    dat_filter <-
-        dat_filter[sort(union(nzero_gene_B0, nzero_gene_B1)),]
-    B0 <- dat_filter[, B0_cell]
+    #####remaining barcodes
+    B0_bc <- names(bc)[bc <= background_threshold]
+    B1_bc <- names(bc)[(bc > background_threshold & bc < retain)]
+    B0 <- dat_filter[, B0_bc]
+    dat <- dat_filter[, B1_bc]
     
     null_count <- rowSums(B0)
+    null_prob <- goodTuringProportions(null_count)[,1]
+    c_prob <- null_prob
     
-    null_prob <- goodTuringProportions(null_count)
-    dat <- dat_filter[, B1_cell]
+    if (any(bc >= retain)) {
+        retain_count <- rowSums(retain_mat[rownames(B0),])
+        retain_prob <- goodTuringProportions(retain_count)[,1]
+        
+        if(c_entropy(null_prob)<=c_entropy(retain_prob)){
+            c_prob <- retain_prob
+        }
+    }
+
+    # c_threshold <-
+    #     mean(unlist(replicate(1000, cor(
+    #         rmultinom(1, 2 * background_threshold, null_prob),
+    #         rmultinom(1, 2 * background_threshold, null_prob)
+    #     ))))
     
-    
-    #automatically calculate cluster cutoff
-    c_threshold <-
-        mean(unlist(replicate(1000, cor(
-            rmultinom(1, 2 * background_threshold, null_prob),
-            rmultinom(1, 2 * background_threshold, null_prob)
-        ))))
-    
+    #function for calculating test statistic
     stat_fun <- function(x) {
         cor(x, null_prob)
     }
     
     if (PrintProg)
         message("Done.\n")
-    ##############################estimate test statistic for all barcodes
+    
+    ####################estimate test statistic for all barcodes
     
     if (PrintProg)
         message("(2/5) Calculating test statistics for barcodes...")
@@ -185,7 +228,8 @@ CB2FindCell <- function(RawDat,
                 Ncores = Ncores,
                 null_prob = null_prob)
     dat_temp <- data.frame(cbind(dat_Cor, colSums(dat)))
-    #Here the test statistic is correlation, but name it as logLH for step 5
+    #Here the test statistic is correlation, but 
+    #we name it as logLH for step 5 use.
     if (PrintProg)
     colnames(dat_temp) <- c("logLH", "count") 
         message("Done.\n")
@@ -194,26 +238,53 @@ CB2FindCell <- function(RawDat,
     clust_mat <- NULL
     if (PrintProg) {
         message("(3/5) Constructing highly-correlated clusters...")
-        message("Cluster threshold: ", round(c_threshold, 3))
     }
-    output_cl <- Calc_cluster_Paral(
+    
+    output_cl_raw <- Calc_cluster_Paral(
         dat,
-        size_hc = 2000,
+        size_hc = 1000,
         Ncores = Ncores,
-        Nclust = 100,
-        c_threshold = c_threshold,
-        dat_cor = dat_Cor
+        dat_cor = dat_Cor,
+        cor_clust, ave_cor, size_cor, 
+        cfun, Calc_cluster, sparse_cor
     )
+    
+    #automatically calculate cluster cutoff
+    c_threshold <- numeric(10)
+    for(bg in seq_len(10)){
+        c_mat <- cor(rmultinom(100, bg * 100, c_prob))
+        diag(c_mat) <- NA
+        c_threshold[bg] <- mean(c_mat, na.rm = TRUE)
+    }
+    if(PrintProg){
+        message("Baseline clustering threshold: ",round(c_threshold[2],3))
+    }
+    c_size_int <- as.numeric(names(output_cl_raw$stat))%/%100
+    c_size_int <- ifelse(c_size_int>10,9,c_size_int)
+    c_size_int <- ifelse(c_size_int<3,2,c_size_int)
+    
+    c_within <- as.numeric(names(output_cl_raw$barcode))
+
+    #Filter out bad clusters. Only keep well-grouped clusters
+    good_clust <- which(c_within>c_threshold[c_size_int])
+    output_cl <- list(barcode=NULL,stat=NULL)
+    for(gc in good_clust){
+        output_cl$barcode <- c(output_cl$barcode,
+                            list(output_cl_raw$barcode[[gc]]))
+        output_cl$stat <- c(output_cl$stat,output_cl_raw$stat[gc])
+    }
+        
     if(is.null(output_cl$barcode)){
+        warning("Failed to construct any cluster. Skipping to Step 5.")
         if(PrintProg){
-            message("Failed to construct any cluster. Skipping to Step 5.")
             message("Does raw data have too few barcodes to construct clusters?\n")
+            message("Is there overexpressed outlier gene? Removal recommended.\n")
         }
-        warning("No cluster constructed. Clustering tests are skipped.")
+        cl_temp <- NULL
     } else{
         if (PrintProg)
             message("Done.\n")
-        ##############################estimate test statistic for every cluster
+        ##############estimate test statistic for every cluster
         cl_Cor <- output_cl$stat
         
         cl_temp <- data.frame(cbind(cl_Cor, names(cl_Cor)))
@@ -292,7 +363,8 @@ CB2FindCell <- function(RawDat,
     
     if ((ncol(dat)) == 0) {
         if (PrintProg)
-            message("\nNo remaining individual barcodes.\nAll finished.\n")
+            message("\nNo remaining individual barcodes.
+                    \nAll finished.\n")
         if (PrintProg)
             print(Sys.time() - time_begin)
         return(
@@ -304,9 +376,10 @@ CB2FindCell <- function(RawDat,
                 background = null_count
             )
         )
-        
+
     } else{
-        cand_barcode <- c(colnames(cbind(dat,B0)), colnames(retain_mat))
+        cand_barcode <- c(colnames(cbind(dat,B0)), 
+                        colnames(retain_mat))
         ED_out <- emptyDrops(RawDat[, cand_barcode], 
                     lower = background_threshold, retain = retain)
         dat_temp$logLH <- ED_out$LogProb[seq_len(ncol(dat))]
@@ -321,7 +394,7 @@ CB2FindCell <- function(RawDat,
             message("All finished.\n")
             print(Sys.time() - time_begin)
         }
-           
+
         return(
             list(
                 cluster_matrix = clust_mat,
@@ -335,7 +408,10 @@ CB2FindCell <- function(RawDat,
     }
 }
 
+
 #' @importFrom iterators iter
+
+#Calculate test statistc for each barcode in parallel 
 Calc_stat <-
     function(dat,
             size = 1000,
@@ -369,22 +445,18 @@ Calc_stat <-
         return(Cor)
     }
 
-
-
-
-
-
-
 #' @importFrom stats as.dist
 #' @importFrom stats hclust
 #' @importFrom stats cutree
 
+#Calculate test statistc for each cluster in parallel 
 Calc_cluster_Paral <- function(dat,
                                 size_hc = 2000,
                                 Ncores = detectCores() - 2,
-                                Nclust = 100,
-                                c_threshold,
-                                dat_cor) {
+                                dat_cor,
+                                cor_clust, ave_cor, size_cor, 
+                                cfun, Calc_cluster, sparse_cor
+                                ) {
     bc <- colSums(dat)
     dat <- dat[, names(sort(bc))]
     
@@ -401,127 +473,175 @@ Calc_cluster_Paral <- function(dat,
     
     dat_tmp_it <- iter(dat_tmp)
     
-    cfun <- function(a, b) {
-        barcode <- c(a$barcode, b$barcode)
-        stat <- c(a$stat, b$stat)
-        return(list(barcode = barcode, stat = stat))
-    }
+
     
     x <- NULL #initialize x to prevent note in R CMD check
     Output <- foreach(x = dat_tmp_it, .combine = "cfun", 
         .packages = c("Matrix")) %dopar% {
-        ave_cor <- function(cor_list) {
-            #remove diagonal 1, remove single-point clusters
-            mean_vec <- c()
-            size_clust <- size_cor(cor_list)
-            for (i in seq_along(size_clust)) {
-                if (size_clust[i] == 1) {
-            #single-point clusters will be filtered out
-            #by correlation threshold
-                    mean_vec <-
-                        c(mean_vec, 0)
-                } else{
-                    cor_temp <- cor_list[[i]]
-                    diag(cor_temp) <- NA
-                    mean_vec <- c(mean_vec, mean(cor_temp, na.rm = TRUE))
-                }
-            }
-            return(mean_vec)
-        }
-        
-        #Note: I know it looks stupid to define functions inside functions, but 
-        #it seems to be the only way I can make the package `foreach` work
-        #correctly. The `.export` parameter in `foreach` function works in R
-        #scripts, but does not work inside my package. I would appreciate any
-        #suggestions for fixing it.
-        
-        #return size of each cluster in a list
-        size_cor <- function(cor_list) {
-            unlist(lapply(cor_list,
-                        function(x)
-                            ifelse(is.null(dim(x)), 1, dim(x)[1])))
-        }
-        
-        #cluster barcodes based on correlation
-        cor_clust <- function(cor_mat, Nclust = 100) {
-            dist_mat <- as.dist(1 - cor_mat)
-            hc <- hclust(dist_mat)
-            hc1 <- cutree(hc, k = Nclust)
-            cor_list <- list()
-            for (i in seq_len(Nclust)) {
-                cor_list[[i]] <- cor_mat[which(hc1 == i), which(hc1 == i)]
-                if (length(cor_list[[i]]) == 1) {
-                    cor_list[[i]] <- as.matrix(cor_list[[i]])
-                    colnames(cor_list[[i]]) <-
-                        colnames(cor_mat)[which(hc1 == i)]
-                    rownames(cor_list[[i]]) <- colnames(cor_list[[i]])
-                }
-            }
-            return(cor_list)
-        }
-        
-        Calc_cluster <-
-            function(dat,
-                    Nclust = 100,
-                    c_threshold,
-                    dat_cor,
-                    dat_bc) {
-                sparse_cor <- function(x) {
-                    #efficient correlation calculation of large sparse matrix
-                    n <- nrow(x)
-                    m <- ncol(x)
-                    # non-empty rows
-                    ii <- unique(x@i) + 1
-                    Ex <- colMeans(x)
-                    #centralize
-                    nozero <- as.vector(x[ii, ]) - rep(Ex, each = length(ii))
-                    covmat <- (crossprod(matrix(nozero, ncol = m)) +
-                                crossprod(t(Ex)) * (n - length(ii))) / (n - 1)
-                    sdvec <- sqrt(diag(covmat))
-                    return(covmat / crossprod(t(sdvec)))
-                }
-                
-                Output_stat <- c()
-                cor_temp <- sparse_cor(dat)
-                clust_temp <-
-                    cor_clust(cor_temp, Nclust = min(Nclust, ncol(dat)))
-                cand_clust <- #highly correlated, more than 1 barcode clusters
-                    which(ave_cor(clust_temp) > c_threshold) 
-                #Under some extreme distribution, no cluster exceeds threshold.
-                #Lower threshold by 10%
-                if (length(cand_clust) == 0) { 
-                    cand_clust <-
-                        which(ave_cor(clust_temp) > c_threshold*0.9)  
-                }
-                
-                #If still no cluster, then keep this result
-                if (length(cand_clust) == 0) {
-                    return(NULL)
-                } else{
-                    cand_bclust <- list()
-                    Output_stat <- numeric(length(cand_clust))
-                    for (i in seq_along(cand_clust)) {
-                        cand_bclust[[i]] <- colnames(
-                            clust_temp[[cand_clust[i]]])
-                    }
-                    for (i in seq_along(cand_bclust)) {
-                        Output_stat[i] <- median(dat_cor[cand_bclust[[i]]])
-                        WM <-
-                            which.min(abs(dat_cor[cand_bclust[[i]]] - 
-                                        Output_stat[i]))
-                        names(Output_stat)[i] <-  dat_bc[cand_bclust[[i]]][WM]
-                    }
-                    names(cand_bclust) <- names(Output_stat)
-                    return(list(barcode = cand_bclust, stat = Output_stat))
-                }
-            }
+
         Calc_cluster(x,
-                    Nclust,
-                    c_threshold,
                     dat_cor = dat_cor,
-                    dat_bc = bc)
+                    dat_bc = bc,
+                    sparse_cor,
+                    cor_clust,
+                    ave_cor,
+                    size_cor)
     }
     
     stopCluster(cl)
     return(Output)
+}
+
+#Construct clusters and calculate test statistics for barcode subsets
+Calc_cluster <-
+    function(dat,
+            dat_cor,
+            dat_bc,
+            sparse_cor,
+            cor_clust,
+            ave_cor,
+            size_cor
+    ) {
+        
+        if(ncol(dat)<=20) return(NULL)
+        Nclust <- ncol(dat)/20
+        Output_stat <- c() #save test statistic for each cluster
+        cor_temp <- sparse_cor(dat) #first calculate pairwise correlation
+        clust_temp <- #then hierarchical clustering 
+            cor_clust(cor_temp, Nclust = min(Nclust, ncol(dat)))
+        cand_bclust <- lapply(clust_temp,colnames)
+        
+        Output_stat <- numeric(Nclust)
+        for (i in seq_len(Nclust)) {
+            Output_stat[i] <- median(dat_cor[cand_bclust[[i]]])
+            WhichMedian <-
+                which.min(abs(dat_cor[cand_bclust[[i]]] - 
+                                Output_stat[i]))
+            names(Output_stat)[i] <-  dat_bc[cand_bclust[[i]]][WhichMedian]
+        }
+        
+        names(cand_bclust) <- ave_cor(clust_temp,size_cor)
+        
+        return(list(barcode = cand_bclust, stat = Output_stat))
+    }
+
+#cluster barcodes based on correlation and return a list
+cor_clust <- function(cor_mat, Nclust = 100) {
+    dist_mat <- as.dist(1 - cor_mat)
+    hc <- hclust(dist_mat)
+    hc1 <- cutree(hc, k = Nclust)
+    cor_list <- list()
+    for (i in seq_len(Nclust)) {
+        cor_list[[i]] <- cor_mat[which(hc1 == i), which(hc1 == i)]
+        if (length(cor_list[[i]]) == 1) {
+            cor_list[[i]] <- as.matrix(cor_list[[i]])
+            colnames(cor_list[[i]]) <-
+                colnames(cor_mat)[which(hc1 == i)]
+            rownames(cor_list[[i]]) <- colnames(cor_list[[i]])
+        }
+    }
+    return(cor_list)
+}
+
+#return size of each cluster in a list
+size_cor <- function(cor_list) {
+    unlist(lapply(cor_list,
+            function(x)
+                ifelse(is.null(dim(x)), 1, dim(x)[1])))
+}
+
+#return averaged correlation of each cluster in a list
+ave_cor <- function(cor_list,size_cor) {
+    #remove diagonal 1, remove single-point clusters
+    mean_vec <- c()
+    size_clust <- size_cor(cor_list)
+    for (i in seq_along(size_clust)) {
+        if (size_clust[i] == 1) {
+            #single-point clusters will be filtered out
+            #by correlation threshold
+            mean_vec <-
+                c(mean_vec, 0)
+        } else{
+            cor_temp <- cor_list[[i]]
+            diag(cor_temp) <- NA
+            mean_vec <- c(mean_vec, mean(cor_temp, na.rm = TRUE))
+        }
+    }
+    return(mean_vec)
+}
+
+#efficient correlation calculation of large sparse matrix
+sparse_cor <- function(x) {
+    
+    n <- nrow(x)
+    m <- ncol(x)
+    # non-empty rows
+    ii <- unique(x@i) + 1
+    Ex <- colMeans(x)
+    #centralize
+    nozero <- as.vector(x[ii, ]) - rep(Ex, each = length(ii))
+    covmat <- (crossprod(matrix(nozero, ncol = m)) +
+                crossprod(t(Ex)) * (n - length(ii))) / (n - 1)
+    sdvec <- sqrt(diag(covmat))
+    return(covmat / crossprod(t(sdvec)))
+}
+
+#combine results in foreach parallel computation
+cfun <- function(a, b) {
+    barcode <- c(a$barcode, b$barcode)
+    stat <- c(a$stat, b$stat)
+    return(list(barcode = barcode, stat = stat))
+}
+
+#entropy
+c_entropy <- function(prob){
+    prob[prob==0] <- 1
+    -sum(prob*log(prob),na.rm = TRUE)
+}
+
+#' @importFrom stats smooth.spline
+#' @importFrom stats predict
+
+#Calculate knee point of a dataset
+#Note: This function is a modified version of barcodeRanks() in 
+#package DropletUtils. We fixed a minor bug causing returned knee point
+#being larger than actual knee point. We also moved the smooth spline fitting
+#to the beginning to avoid unstable knee point estimation when lower threshold
+#changes. For its origin, see 
+#https://github.com/MarioniLab/DropletUtils/blob/master/R/barcodeRanks.R
+Calc_retain <- function(dat,lower){
+    dat <- FilterGB(dat)
+    totals <- unname(colSums(dat))
+    o <- order(totals, decreasing=TRUE)
+    
+    stuff <- rle(totals[o])
+    # Get mid-rank of each run.
+    run.rank <- cumsum(stuff$lengths) - (stuff$lengths-1)/2 
+    run.totals <- stuff$values
+    
+    keep <- run.totals > lower
+    if (sum(keep)<3) { 
+        stop("insufficient unique points for computing knee/inflection points")
+    }
+
+    x <- log10(run.rank[keep])
+    fit <- smooth.spline(log10(run.rank), log10(run.totals), df=20)
+    y <- predict(fit)$y[keep]
+    #y <- log10(run.totals[keep])
+    # Numerical differentiation to identify bounds for spline fitting.
+    # The upper/lower bounds are defined at the plateau and inflection, respectively.
+    d1n <- diff(y)/diff(x)
+    right.edge <- which.min(d1n)
+    left.edge <- which.max(d1n[seq_len(right.edge)])
+    # We restrict to this region, thereby simplifying the shape of the curve.
+    # This allows us to get a decent fit with low df for stable differentiation.
+    new.keep <- left.edge:right.edge
+    # Smoothing to avoid error multiplication upon differentiation.
+    # Minimizing the signed curvature and returning the total for the knee point.
+    d1 <- predict(fit, deriv=1)$y[keep][new.keep]
+    d2 <- predict(fit, deriv=2)$y[keep][new.keep]
+    curvature <- d2/(1 + d1^2)^1.5
+    knee <- 10^(y[new.keep][which.min(curvature)])
+    inflection <- 10^(y[right.edge])
+    return(list(knee=round(knee),inflection=round(inflection)))
 }
