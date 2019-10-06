@@ -9,17 +9,22 @@ GetCellMat(CBout, MTfilter = 1, MTgene = NULL)
 \arguments{
 \item{CBout}{Output object from \code{CB2FindCell}.}
 
-\item{MTfilter}{Numeric value between 0 to 1. Default: \code{1} (No filtering). Mitochondrial gene expression proportion filtering threshold for broken cells. The proportion of mitochondrial gene
-expressions is calculated from the scaled sum of all genes starting with "MT-" (human) or "mt-" (mouse).}
+\item{MTfilter}{Numeric value between 0 to 1. Default: \code{1} 
+(No filtering). Mitochondrial gene expression proportion filtering 
+threshold for broken cells. The proportion of mitochondrial gene
+expressions is calculated from the scaled sum of all genes starting 
+with "MT-" (human) or "mt-" (mouse).}
 
-\item{MTgene}{Character vector. User may specify customized mitochondrial gene IDs to perform the filtering.}
+\item{MTgene}{Character vector. User may specify customized mitochondrial
+gene IDs to perform the filtering.}
 }
 \value{
 A \code{dgCMatrix} count matrix of real cells.
 }
 \description{
-Handy function to extract real cell matrix from \code{CB2FindCell} output. It also provides
-the option to filter out broken cells based on proportion of mitochondrial gene expressions.
+Handy function to extract real cell matrix from \code{CB2FindCell} output. 
+It also provides the option to filter out broken cells based on proportion 
+of mitochondrial gene expressions.
 }
 \examples{
 data(mbrainSub)

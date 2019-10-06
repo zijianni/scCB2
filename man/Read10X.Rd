@@ -15,27 +15,30 @@ directory should include three files: barcodes.tsv, genes.tsv, matrix.mtx.
 For Cell Ranger version >=3, directory should include three
 files: barcodes.tsv.gz, features.tsv.gz, matrix.mtx.gz.}
 
-\item{row.name}{Specify either using gene names (\code{row.name = "name"}) or
-gene Ensembl IDs (\code{row.name = "id"}) as row names of the count matrix.
-Default is \code{row.name = "name"}.}
+\item{row.name}{Specify either using gene names (\code{row.name = "name"}) 
+or gene Ensembl IDs (\code{row.name = "id"}) as row names of the count 
+matrix. Default is \code{row.name = "name"}.}
 
-\item{meta}{Logical. If \code{TRUE}, returns a list containing both the count matrix
-and metadata of genes (features). Metadata includes feature names, IDs and other
-additional information depending on Cell Ranger output. If \code{FALSE} (default),
-only returns the count matrix.}
+\item{meta}{Logical. If \code{TRUE}, returns a list containing both the 
+count matrix and metadata of genes (features). Metadata includes feature 
+names, IDs and other additional information depending on Cell Ranger 
+output. If \code{FALSE} (default), only returns the count matrix.}
 
 \item{h5file}{The path of 10X output HDF5 file (ended with .h5).}
 }
 \value{
-If \code{meta = TRUE}, returns a list of two elements: a "dgCMatrix"
-sparse matrix containing expression counts and a data frame containing metadata of
-genes (features). For the count matrix, each row is a gene (feature) and
-each column is a barcode.  If \code{meta = FALSE}, only returns the count matrix.
+If \code{meta = TRUE}, returns a list of two elements: a 
+"dgCMatrix" sparse matrix containing expression counts and a data 
+frame containing metadata of genes (features). For the count matrix, 
+each row is a gene (feature) and each column is a barcode.  If 
+\code{meta = FALSE}, only returns the count matrix.
 }
 \description{
-\code{Read10X} is a one-line handy function for reading 10X Cell Ranger output data, producing a 
-count matrix for input to \code{CB2FindCell}. \code{Read10Xh5} is for reading 10X Cell Ranger output
-HDF5 file (ended with .h5).  Works under both old (<3) and new (>=3) Cell Ranger version.
+\code{Read10X} is a one-line handy function for reading 
+10X Cell Ranger output data, producing a count matrix for input to 
+\code{CB2FindCell}. \code{Read10Xh5} is for reading 10X Cell Ranger output
+HDF5 file (ended with .h5).  Works under both old (<3) and new (>=3) 
+Cell Ranger version.
 }
 \examples{
 

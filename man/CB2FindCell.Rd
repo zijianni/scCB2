@@ -2,68 +2,93 @@
 % Please edit documentation in R/CB2FindCell.R
 \name{CB2FindCell}
 \alias{CB2FindCell}
-\title{Distinguish real cells from empty droplets using clustering-based Monte-Carlo test.}
+\title{Distinguish real cells from empty droplets using clustering-based 
+Monte-Carlo test.}
 \usage{
 CB2FindCell(RawDat, FDR_threshold = 0.01, background_threshold = 100,
   RemoveProtein = TRUE, retain = NULL, Ncores = detectCores() - 2,
   PrintProg = TRUE)
 }
 \arguments{
-\item{RawDat}{Matrix. Supports standard matrix or sparse matrix. This is the raw feature-by-barcode count matrix.}
+\item{RawDat}{Matrix. Supports standard matrix or sparse matrix. 
+This is the raw feature-by-barcode count matrix.}
 
-\item{FDR_threshold}{Numeric between 0 and 1. Default: 0.01. The False Discovery Rate (FDR) to be controlled for multiple testing.}
+\item{FDR_threshold}{Numeric between 0 and 1. Default: 0.01. 
+The False Discovery Rate (FDR) to be controlled for multiple testing.}
 
-\item{background_threshold}{Positive integer. Default: 100. All barcodes whose total count below or equal to this threshold
-are defined as background empty droplets. They will be used to estimate the background distribution. The remaining barcodes
-will be test against background distribution. If sequencing depth is deliberately made higher (lower)
-than usual, this threshold can be leveled up (down) correspondingly to get reasonable number of cells.
-Recommended sequencing depth for this default threshold: 40,000~80,000 reads per cell.}
+\item{background_threshold}{Positive integer. Default: 100. All barcodes 
+whose total count below or equal to this threshold are defined as 
+background empty droplets. They will be used to estimate the background 
+distribution. The remaining barcodes will be test against background 
+distribution. If sequencing depth is deliberately made higher (lower)
+than usual, this threshold can be leveled up (down) correspondingly to 
+get reasonable number of cells. Recommended sequencing depth for this 
+default threshold: 40,000~80,000 reads per cell.}
 
-\item{RemoveProtein}{Logical. Default: \code{TRUE}. For 10X Cell Ranger version >=3, extra features (surface proteins) besides genes 
-are measured simultaneously. If \code{RemoveProtein = TRUE}, only genes are used for testing. Removing extra features are recommended
-because the default pooling threshold (100) is chosen only for handling gene expression. Protein expression level is hugely different
-from gene expression level. If using the default pooling threshold while keeping proteins, the estimated background distribution
-will be hugely biased and does not reflect the real background distribution of empty droplets.}
+\item{RemoveProtein}{Logical. Default: \code{TRUE}. For 10X Cell Ranger 
+version >=3, extra features (surface proteins) besides genes 
+are measured simultaneously. If \code{RemoveProtein = TRUE}, only genes 
+are used for testing. Removing extra features are recommended
+because the default pooling threshold (100) is chosen only for handling 
+gene expression. Protein expression level is hugely different
+from gene expression level. If using the default pooling threshold 
+while keeping proteins, the estimated background distribution
+will be hugely biased and does not reflect the real background distribution 
+of empty droplets.}
 
-\item{retain}{Positive integer. Default: \code{NULL}. This is the retain threshold for large barcodes. All barcodes whose
-total counts are larger or equal to retain threshold are directly classified as real cells prior to testing. If \code{retain = NULL}, the knee point
-of the log rank curve of barcodes total counts will serve as the retain threshold, which is calculated using package
-\code{DropletUtils}'s method. If \code{retain = Inf}, no barcodes will be retained prior to testing. If manually specified,
-it should be greater than pooling threshold.}
+\item{retain}{Positive numeric. Default: \code{NULL}. This is the retain 
+threshold for large barcodes. All barcodes whose total counts are larger 
+or equal to retain threshold are directly classified as real cells prior 
+to testing. If \code{retain = NULL}, the knee point of the log rank curve 
+of barcodes total counts will serve as the retain threshold, which is 
+calculated using package \code{DropletUtils}'s method. If 
+\code{retain = Inf}, no barcodes will be retained prior to testing. 
+If manually specified, it should be greater than pooling threshold.}
 
-\item{Ncores}{Positive integer. Default: \code{detectCores() - 2}. Number of cores for parallel computation.}
+\item{Ncores}{Positive integer. Default: \code{detectCores() - 2}. 
+Number of cores for parallel computation.}
 
-\item{PrintProg}{Logical. Default: \code{TRUE}. If \code{PrintProg = TRUE}, progressing messages will be printed.}
+\item{PrintProg}{Logical. Default: \code{TRUE}. If \code{PrintProg = TRUE}, 
+progressing messages will be printed.}
 }
 \value{
-A list of (1) real cell barcode matrix distinguished during cluster-level test, (2) real cell barcode matrix
-distinguished during single-barcode-level test, (3) testing statistics (Pearson correlation to the background) 
-for all candidate barcode clusters, (4) barcode IDs for all candidate barcode clusters, the name of each cluster is its median 
-barcode size, (5) testing statistics (log likelihood under background distribution) for remaining single barcodes not clustered,
-(6) estimated background distribution count vector.
+A list of (1) real cell barcode matrix distinguished during 
+cluster-level test, (2) real cell barcode matrix 
+distinguished during single-barcode-level 
+test plus large cells who exceed retain threshold, (3) testing statistics 
+(Pearson correlation to the background) for all candidate barcode clusters, 
+(4) barcode IDs for all candidate barcode clusters, the name of each cluster 
+is its median barcode size, (5) testing statistics 
+(log likelihood under background distribution) for remaining single 
+barcodes not clustered, (6) estimated background distribution count vector.
 }
 \description{
-The main function of \code{scCB2} package. Distinguish real cells from empty droplets 
-using clustering-based Monte-Carlo test.
+The main function of \code{scCB2} package. Distinguish real cells 
+from empty droplets using clustering-based Monte-Carlo test.
 }
 \details{
-Input data is a feature-by-barcode matrix. Background barcodes are defined based
-on \code{background_threshold}. Large barcodes are automatically treated as real cells
-based on \code{retain}. Remaining barcodes will be first clustered into subgroups, then 
-tested against background using Monte-Carlo p-values simulated from Multinomial distribution.
-The rest barcodes will be further tested using EmptyDrops (Aaron T. L. Lun \emph{et. al. 2019}).
+Input data is a feature-by-barcode matrix. Background barcodes are 
+defined based on \code{background_threshold}. Large barcodes are 
+automatically treated as real cells based on \code{retain}. Remaining 
+barcodes will be first clustered into subgroups, then 
+tested against background using Monte-Carlo p-values simulated from 
+Multinomial distribution. The rest barcodes will be further tested 
+using EmptyDrops (Aaron T. L. Lun \emph{et. al. 2019}).
 FDR is controlled based on \code{FDR_threshold}.
 
 This function supports parallel computation. \code{Ncores} is used to specify
 number of cores. 
 
-Under CellRanger version >=3, extra features other than genes are simultaneously measured 
-(e.g. surface protein). We recommend filtering them out using \code{RemoveProtein = TRUE}
-because the measurement of protein abundance is not in the same level as gene expression counts.
-If using the default pooling threshold while keeping proteins, the estimated background distribution
-will be hugely biased and does not reflect the real background distribution of empty droplets.
-The resulting matrix will contain lots of barcodes who have almost zero gene expression
-and relatively high protein expression, which are usually not useful for RNA-Seq study.
+Under CellRanger version >=3, extra features other than genes are 
+simultaneously measured (e.g. surface protein). We recommend filtering 
+them out using \code{RemoveProtein = TRUE} because the measurement of 
+protein abundance is not in the same level as gene expression counts.
+If using the default pooling threshold while keeping proteins, the 
+estimated background distribution will be hugely biased and does not 
+reflect the real background distribution of empty droplets. The resulting 
+matrix will contain lots of barcodes who have almost zero gene expression
+and relatively high protein expression, which are usually not useful for 
+RNA-Seq study.
 }
 \examples{
 # raw data, all barcodes
