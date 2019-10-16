@@ -5,8 +5,8 @@
 \title{Distinguish real cells from empty droplets using clustering-based 
 Monte-Carlo test.}
 \usage{
-CB2FindCell(RawDat, FDR_threshold = 0.01, background_threshold = 100,
-  RemoveProtein = TRUE, retain = NULL, Ncores = detectCores() - 2,
+CB2FindCell(RawDat, FDR_threshold = 0.01, lower = 100,
+  RemoveProtein = TRUE, upper = NULL, Ncores = detectCores() - 2,
   PrintProg = TRUE)
 }
 \arguments{
@@ -16,7 +16,7 @@ This is the raw feature-by-barcode count matrix.}
 \item{FDR_threshold}{Numeric between 0 and 1. Default: 0.01. 
 The False Discovery Rate (FDR) to be controlled for multiple testing.}
 
-\item{background_threshold}{Positive integer. Default: 100. All barcodes 
+\item{lower}{Positive integer. Default: 100. All barcodes 
 whose total count below or equal to this threshold are defined as 
 background empty droplets. They will be used to estimate the background 
 distribution. The remaining barcodes will be test against background 
@@ -36,13 +36,13 @@ while keeping proteins, the estimated background distribution
 will be hugely biased and does not reflect the real background distribution 
 of empty droplets.}
 
-\item{retain}{Positive numeric. Default: \code{NULL}. This is the retain 
+\item{upper}{Positive numeric. Default: \code{NULL}. This is the upper 
 threshold for large barcodes. All barcodes whose total counts are larger 
-or equal to retain threshold are directly classified as real cells prior 
-to testing. If \code{retain = NULL}, the knee point of the log rank curve 
-of barcodes total counts will serve as the retain threshold, which is 
+or equal to upper threshold are directly classified as real cells prior 
+to testing. If \code{upper = NULL}, the knee point of the log rank curve 
+of barcodes total counts will serve as the upper threshold, which is 
 calculated using package \code{DropletUtils}'s method. If 
-\code{retain = Inf}, no barcodes will be retained prior to testing. 
+\code{upper = Inf}, no barcodes will be retained prior to testing. 
 If manually specified, it should be greater than pooling threshold.}
 
 \item{Ncores}{Positive integer. Default: \code{detectCores() - 2}. 
@@ -55,12 +55,13 @@ progressing messages will be printed.}
 A list of (1) real cell barcode matrix distinguished during 
 cluster-level test, (2) real cell barcode matrix 
 distinguished during single-barcode-level 
-test plus large cells who exceed retain threshold, (3) testing statistics 
+test plus large cells who exceed upper threshold, (3) testing statistics 
 (Pearson correlation to the background) for all candidate barcode clusters, 
 (4) barcode IDs for all candidate barcode clusters, the name of each cluster 
 is its median barcode size, (5) testing statistics 
 (log likelihood under background distribution) for remaining single 
-barcodes not clustered, (6) estimated background distribution count vector.
+barcodes not clustered, (6) background distribution count vector,
+without Good-Turing correction.
 }
 \description{
 The main function of \code{scCB2} package. Distinguish real cells 
@@ -68,8 +69,8 @@ from empty droplets using clustering-based Monte-Carlo test.
 }
 \details{
 Input data is a feature-by-barcode matrix. Background barcodes are 
-defined based on \code{background_threshold}. Large barcodes are 
-automatically treated as real cells based on \code{retain}. Remaining 
+defined based on \code{lower}. Large barcodes are 
+automatically treated as real cells based on \code{upper}. Remaining 
 barcodes will be first clustered into subgroups, then 
 tested against background using Monte-Carlo p-values simulated from 
 Multinomial distribution. The rest barcodes will be further tested 
@@ -97,7 +98,7 @@ str(mbrainSub)
 
 # run CB2
 CBOut <- CB2FindCell(mbrainSub, FDR_threshold = 0.01, 
-    background_threshold = 100, Ncores = 2)
+    lower = 100, Ncores = 2)
 RealCell <- GetCellMat(CBOut, MTfilter = 0.05)
 
 # real cells
