@@ -20,7 +20,7 @@
 #' @examples
 #' data(mbrainSub)
 #' CBOut <- CB2FindCell(mbrainSub, FDR_threshold = 0.01,
-#'     background_threshold = 100, Ncores = 2)
+#'     lower = 100, Ncores = 2)
 #' RealCell <- GetCellMat(CBOut, MTfilter = 0.05)
 #' str(RealCell)
 #'

@@ -10,7 +10,7 @@
 #' @param FDR_threshold Numeric between 0 and 1. Default: 0.01. 
 #' The False Discovery Rate (FDR) to be controlled for multiple testing.
 #' 
-#' @param background_threshold Positive integer. Default: 100. All barcodes 
+#' @param lower Positive integer. Default: 100. All barcodes 
 #' whose total count below or equal to this threshold are defined as 
 #' background empty droplets. They will be used to estimate the background 
 #' distribution. The remaining barcodes will be test against background 
@@ -30,13 +30,13 @@
 #' will be hugely biased and does not reflect the real background distribution 
 #' of empty droplets.   
 #' 
-#' @param retain Positive numeric. Default: \code{NULL}. This is the retain 
+#' @param upper Positive numeric. Default: \code{NULL}. This is the upper 
 #' threshold for large barcodes. All barcodes whose total counts are larger 
-#' or equal to retain threshold are directly classified as real cells prior 
-#' to testing. If \code{retain = NULL}, the knee point of the log rank curve 
-#' of barcodes total counts will serve as the retain threshold, which is 
+#' or equal to upper threshold are directly classified as real cells prior 
+#' to testing. If \code{upper = NULL}, the knee point of the log rank curve 
+#' of barcodes total counts will serve as the upper threshold, which is 
 #' calculated using package \code{DropletUtils}'s method. If 
-#' \code{retain = Inf}, no barcodes will be retained prior to testing. 
+#' \code{upper = Inf}, no barcodes will be retained prior to testing. 
 #' If manually specified, it should be greater than pooling threshold. 
 #' 
 #' @param Ncores Positive integer. Default: \code{detectCores() - 2}. 
@@ -48,7 +48,7 @@
 #' @return A list of (1) real cell barcode matrix distinguished during 
 #' cluster-level test, (2) real cell barcode matrix 
 #' distinguished during single-barcode-level 
-#' test plus large cells who exceed retain threshold, (3) testing statistics 
+#' test plus large cells who exceed upper threshold, (3) testing statistics 
 #' (Pearson correlation to the background) for all candidate barcode clusters, 
 #' (4) barcode IDs for all candidate barcode clusters, the name of each cluster 
 #' is its median barcode size, (5) testing statistics 
@@ -59,8 +59,8 @@
 #' @details 
 #' 
 #' Input data is a feature-by-barcode matrix. Background barcodes are 
-#' defined based on \code{background_threshold}. Large barcodes are 
-#' automatically treated as real cells based on \code{retain}. Remaining 
+#' defined based on \code{lower}. Large barcodes are 
+#' automatically treated as real cells based on \code{upper}. Remaining 
 #' barcodes will be first clustered into subgroups, then 
 #' tested against background using Monte-Carlo p-values simulated from 
 #' Multinomial distribution. The rest barcodes will be further tested 
@@ -88,7 +88,7 @@
 #' 
 #' # run CB2
 #' CBOut <- CB2FindCell(mbrainSub, FDR_threshold = 0.01, 
-#'     background_threshold = 100, Ncores = 2)
+#'     lower = 100, Ncores = 2)
 #' RealCell <- GetCellMat(CBOut, MTfilter = 0.05)
 #' 
 #' # real cells
@@ -111,9 +111,9 @@
 
 CB2FindCell <- function(RawDat,
                         FDR_threshold = 0.01,
-                        background_threshold = 100,
+                        lower = 100,
                         RemoveProtein = TRUE,
-                        retain = NULL,
+                        upper = NULL,
                         Ncores = detectCores() - 2,
                         PrintProg = TRUE) {
     time_begin <- Sys.time()
@@ -125,7 +125,7 @@ CB2FindCell <- function(RawDat,
     
     if (PrintProg) {
         message("FDR threshold: ", FDR_threshold)
-        message("Background threshold: ", background_threshold)
+        message("Lower threshold: ", lower)
         message("Cores allocated: ", Ncores, "\n")
     }
     
@@ -151,42 +151,42 @@ CB2FindCell <- function(RawDat,
         dat_filter <- FilterGB(RawDat,0,0) 
     }
 
-    if (is.null(retain)) {
+    if (is.null(upper)) {
         
-        brank <- Calc_retain(dat_filter, lower = background_threshold)
+        brank <- Calc_upper(dat_filter, lower = lower)
         #check convergence of knee point
         repeat{
-            retain_temp <- brank$knee
-            brank <- Calc_retain(dat_filter, brank$inflection + 100)
-            if(brank$knee==retain_temp) break
+            upper_temp <- brank$knee
+            brank <- Calc_upper(dat_filter, brank$inflection + 100)
+            if(brank$knee==upper_temp) break
         }
         
-        if (is.null(retain_temp)) {
+        if (is.null(upper_temp)) {
             stop("Failed to calculate knee point. Probably not enough barcodes.")
         }
-        retain <- retain_temp
+        upper <- upper_temp
     }
     
     if (PrintProg) {
-        message("Retain threshold: ", retain)
+        message("Upper threshold: ", upper)
     }
-    if(retain <= background_threshold){
-        stop("Retain threshold should be larger than background threshold.")
+    if(upper <= lower){
+        stop("Upper threshold should be larger than lower threshold.")
     }
     
     #####Large real cells
     bc <- colSums(dat_filter)
-    if (any(bc >= retain)) {
-        retain_cell <- names(bc)[bc >= retain]
-        retain_mat <- RawDat[, retain_cell]
-        dat_filter <- FilterGB(dat_filter[,bc < retain], 0, 0)
+    if (any(bc >= upper)) {
+        upper_cell <- names(bc)[bc >= upper]
+        upper_mat <- RawDat[, upper_cell]
+        dat_filter <- FilterGB(dat_filter[,bc < upper], 0, 0)
     }else{
-        retain_mat <- NULL
+        upper_mat <- NULL
     }
     
     #####remaining barcodes
-    B0_bc <- names(bc)[bc <= background_threshold]
-    B1_bc <- names(bc)[(bc > background_threshold & bc < retain)]
+    B0_bc <- names(bc)[bc <= lower]
+    B1_bc <- names(bc)[(bc > lower & bc < upper)]
     B0 <- dat_filter[, B0_bc]
     dat <- dat_filter[, B1_bc]
     
@@ -194,19 +194,19 @@ CB2FindCell <- function(RawDat,
     null_prob <- goodTuringProportions(null_count)[,1]
     c_prob <- null_prob
     
-    if (any(bc >= retain)) {
-        retain_count <- rowSums(retain_mat[rownames(B0),])
-        retain_prob <- goodTuringProportions(retain_count)[,1]
+    if (any(bc >= upper)) {
+        upper_count <- rowSums(upper_mat[rownames(B0),])
+        upper_prob <- goodTuringProportions(upper_count)[,1]
         
-        if(c_entropy(null_prob)<=c_entropy(retain_prob)){
-            c_prob <- retain_prob
+        if(c_entropy(null_prob)<=c_entropy(upper_prob)){
+            c_prob <- upper_prob
         }
     }
 
     # c_threshold <-
     #     mean(unlist(replicate(1000, cor(
-    #         rmultinom(1, 2 * background_threshold, null_prob),
-    #         rmultinom(1, 2 * background_threshold, null_prob)
+    #         rmultinom(1, 2 * lower, null_prob),
+    #         rmultinom(1, 2 * lower, null_prob)
     #     ))))
     
     #function for calculating test statistic
@@ -370,7 +370,7 @@ CB2FindCell <- function(RawDat,
         return(
             list(
                 cluster_matrix = clust_mat,
-                cell_matrix = retain_mat,
+                cell_matrix = upper_mat,
                 ClusterStat = cl_temp,
                 Cluster = output_cl$barcode,
                 background = null_count
@@ -379,9 +379,9 @@ CB2FindCell <- function(RawDat,
 
     } else{
         cand_barcode <- c(colnames(cbind(dat,B0)), 
-                        colnames(retain_mat))
+                        colnames(upper_mat))
         ED_out <- emptyDrops(RawDat[, cand_barcode], 
-                    lower = background_threshold, retain = retain)
+                    lower = lower, upper = upper)
         dat_temp$logLH <- ED_out$LogProb[seq_len(ncol(dat))]
         dat_temp$pval <- ED_out$PValue[seq_len(ncol(dat))]
         dat_temp$padj <- ED_out$FDR[seq_len(ncol(dat))]
@@ -609,7 +609,7 @@ c_entropy <- function(prob){
 #to the beginning to avoid unstable knee point estimation when lower threshold
 #changes. For its origin, see 
 #https://github.com/MarioniLab/DropletUtils/blob/master/R/barcodeRanks.R
-Calc_retain <- function(dat,lower){
+Calc_upper <- function(dat,lower){
     dat <- FilterGB(dat)
     totals <- unname(colSums(dat))
     o <- order(totals, decreasing=TRUE)

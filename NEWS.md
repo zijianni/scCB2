@@ -32,3 +32,9 @@
 * Rounded baseline threshold.
 * Minor changes on vignette.
 * Bug fix when retain threshold is larger than any barcode.
+
+## scCB2 0.99.14
+
+---------------------
+
+* Change parameter names to match those in the paper: retain -> upper. background -> lower.

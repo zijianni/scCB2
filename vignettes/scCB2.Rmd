@@ -67,7 +67,7 @@ The main function `CB2FindCell` takes raw count matrix as input and return real 
 
 ```{r}
 CBOut <- CB2FindCell(mbrainSub, FDR_threshold = 0.01, 
-    background_threshold = 100, Ncores = 2, PrintProg = TRUE)
+    lower = 100, Ncores = 2, PrintProg = TRUE)
 summary(CBOut)
 ```
 
