@@ -1,6 +1,6 @@
 data(mbrainSub)
 CBOut <- CB2FindCell(mbrainSub, FDR_threshold = 0.01,
-    background_threshold = 100, Ncores = 2)
+    lower = 100, Ncores = 2)
 
 
 

@@ -381,7 +381,7 @@ CB2FindCell <- function(RawDat,
         cand_barcode <- c(colnames(cbind(dat,B0)), 
                         colnames(upper_mat))
         ED_out <- emptyDrops(RawDat[, cand_barcode], 
-                    lower = lower, upper = upper)
+                    lower = lower, retain = upper)
         dat_temp$logLH <- ED_out$LogProb[seq_len(ncol(dat))]
         dat_temp$pval <- ED_out$PValue[seq_len(ncol(dat))]
         dat_temp$padj <- ED_out$FDR[seq_len(ncol(dat))]
