@@ -1,6 +1,6 @@
 Package: scCB2
-Version: 0.99.14
-Date: 2019/9/22
+Version: 0.99.15
+Date: 2019/10/23
 Title: CB2: A cluster-based approach for distinguishing cells from background barcodes in 10X Genomics Data 
 Authors@R: c(
     person("Zijian", "Ni", role = c("aut", "cre"), email = "zni25@wisc.edu"), 

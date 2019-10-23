@@ -5,9 +5,8 @@
 \title{Distinguish real cells from empty droplets using clustering-based 
 Monte-Carlo test.}
 \usage{
-CB2FindCell(RawDat, FDR_threshold = 0.01, lower = 100,
-  RemoveProtein = TRUE, upper = NULL, Ncores = detectCores() - 2,
-  PrintProg = TRUE)
+CB2FindCell(RawDat, FDR_threshold = 0.01, lower = 100, upper = NULL,
+  RemoveProtein = TRUE, Ncores = detectCores() - 2, PrintProg = TRUE)
 }
 \arguments{
 \item{RawDat}{Matrix. Supports standard matrix or sparse matrix. 
@@ -25,6 +24,15 @@ than usual, this threshold can be leveled up (down) correspondingly to
 get reasonable number of cells. Recommended sequencing depth for this 
 default threshold: 40,000~80,000 reads per cell.}
 
+\item{upper}{Positive numeric. Default: \code{NULL}. This is the upper 
+threshold for large barcodes. All barcodes whose total counts are larger 
+or equal to upper threshold are directly classified as real cells prior 
+to testing. If \code{upper = NULL}, the knee point of the log rank curve 
+of barcodes total counts will serve as the upper threshold, which is 
+calculated using package \code{DropletUtils}'s method. If 
+\code{upper = Inf}, no barcodes will be retained prior to testing. 
+If manually specified, it should be greater than pooling threshold.}
+
 \item{RemoveProtein}{Logical. Default: \code{TRUE}. For 10X Cell Ranger 
 version >=3, extra features (surface proteins) besides genes 
 are measured simultaneously. If \code{RemoveProtein = TRUE}, only genes 
@@ -35,15 +43,6 @@ from gene expression level. If using the default pooling threshold
 while keeping proteins, the estimated background distribution
 will be hugely biased and does not reflect the real background distribution 
 of empty droplets.}
-
-\item{upper}{Positive numeric. Default: \code{NULL}. This is the upper 
-threshold for large barcodes. All barcodes whose total counts are larger 
-or equal to upper threshold are directly classified as real cells prior 
-to testing. If \code{upper = NULL}, the knee point of the log rank curve 
-of barcodes total counts will serve as the upper threshold, which is 
-calculated using package \code{DropletUtils}'s method. If 
-\code{upper = Inf}, no barcodes will be retained prior to testing. 
-If manually specified, it should be greater than pooling threshold.}
 
 \item{Ncores}{Positive integer. Default: \code{detectCores() - 2}. 
 Number of cores for parallel computation.}

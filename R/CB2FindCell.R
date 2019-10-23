@@ -19,6 +19,15 @@
 #' get reasonable number of cells. Recommended sequencing depth for this 
 #' default threshold: 40,000~80,000 reads per cell.
 #' 
+#' @param upper Positive numeric. Default: \code{NULL}. This is the upper 
+#' threshold for large barcodes. All barcodes whose total counts are larger 
+#' or equal to upper threshold are directly classified as real cells prior 
+#' to testing. If \code{upper = NULL}, the knee point of the log rank curve 
+#' of barcodes total counts will serve as the upper threshold, which is 
+#' calculated using package \code{DropletUtils}'s method. If 
+#' \code{upper = Inf}, no barcodes will be retained prior to testing. 
+#' If manually specified, it should be greater than pooling threshold. 
+#' 
 #' @param RemoveProtein Logical. Default: \code{TRUE}. For 10X Cell Ranger 
 #' version >=3, extra features (surface proteins) besides genes 
 #' are measured simultaneously. If \code{RemoveProtein = TRUE}, only genes 
@@ -29,15 +38,6 @@
 #' while keeping proteins, the estimated background distribution
 #' will be hugely biased and does not reflect the real background distribution 
 #' of empty droplets.   
-#' 
-#' @param upper Positive numeric. Default: \code{NULL}. This is the upper 
-#' threshold for large barcodes. All barcodes whose total counts are larger 
-#' or equal to upper threshold are directly classified as real cells prior 
-#' to testing. If \code{upper = NULL}, the knee point of the log rank curve 
-#' of barcodes total counts will serve as the upper threshold, which is 
-#' calculated using package \code{DropletUtils}'s method. If 
-#' \code{upper = Inf}, no barcodes will be retained prior to testing. 
-#' If manually specified, it should be greater than pooling threshold. 
 #' 
 #' @param Ncores Positive integer. Default: \code{detectCores() - 2}. 
 #' Number of cores for parallel computation.
@@ -112,8 +112,8 @@
 CB2FindCell <- function(RawDat,
                         FDR_threshold = 0.01,
                         lower = 100,
-                        RemoveProtein = TRUE,
                         upper = NULL,
+                        RemoveProtein = TRUE,
                         Ncores = detectCores() - 2,
                         PrintProg = TRUE) {
     time_begin <- Sys.time()
@@ -202,12 +202,6 @@ CB2FindCell <- function(RawDat,
             c_prob <- upper_prob
         }
     }
-
-    # c_threshold <-
-    #     mean(unlist(replicate(1000, cor(
-    #         rmultinom(1, 2 * lower, null_prob),
-    #         rmultinom(1, 2 * lower, null_prob)
-    #     ))))
     
     #function for calculating test statistic
     stat_fun <- function(x) {
@@ -451,7 +445,7 @@ Calc_stat <-
 
 #Calculate test statistc for each cluster in parallel 
 Calc_cluster_Paral <- function(dat,
-                                size_hc = 2000,
+                                size_hc = 1000,
                                 Ncores = detectCores() - 2,
                                 dat_cor,
                                 cor_clust, ave_cor, size_cor, 
@@ -463,6 +457,15 @@ Calc_cluster_Paral <- function(dat,
     #####parallel computation
     apply_ind <-
         split(seq_len(ncol(dat)), ceiling(seq_len(ncol(dat)) / size_hc))
+    
+    #if the last group is too small, combine with the second last.
+    if( (length(apply_ind[[length(apply_ind)]]) < size_hc / 2) &&
+        (length(apply_ind) > 1) ){
+        apply_ind[[length(apply_ind)-1]] <- 
+            c(apply_ind[[length(apply_ind)-1]], 
+            apply_ind[[length(apply_ind)]])
+        apply_ind[[length(apply_ind)]] <- NULL
+    }
     
     cl <- makeCluster(Ncores)
     registerDoParallel(cl)
