@@ -44,3 +44,12 @@
 ---------------------
 
 * When dividing barcodes into groups with similar barcode counts, the last group will be combined with second last group if the number of barcodes in the last group is less than half of that in the second last group. 
+
+## scCB2 0.99.16
+
+---------------------
+
+* Change function name `Read10X` to be `Read10xRaw`, `Read10Xh5` to be `Read10xRawH5`
+* Change parameter name `PrintProg` to be `verbose`.
+* Minor edits on parameter description of function `GetCellMat`.
+* Added a quick function `QuickCB2` by combining all necessary functions into one. Input: directory of raw data. Output: filtered matrix, or a Seurat object containing filtered matrix.

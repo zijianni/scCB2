@@ -1,0 +1,10 @@
+* using log directory 'C:/Users/hallu/Google Drive/GitHub/scCB2/scCB2/..Rcheck'
+* using R Under development (unstable) (2019-07-17 r76847)
+* using platform: x86_64-w64-mingw32 (64-bit)
+* using session charset: CP936
+* using option '--no-build-vignettes'
+* checking for file './DESCRIPTION' ... ERROR
+Required fields missing or empty:
+  'Author' 'Maintainer'
+* DONE
+Status: 1 ERROR

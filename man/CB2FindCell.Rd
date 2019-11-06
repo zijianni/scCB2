@@ -6,7 +6,7 @@
 Monte-Carlo test.}
 \usage{
 CB2FindCell(RawDat, FDR_threshold = 0.01, lower = 100, upper = NULL,
-  RemoveProtein = TRUE, Ncores = detectCores() - 2, PrintProg = TRUE)
+  RemoveProtein = TRUE, Ncores = detectCores() - 2, verbose = TRUE)
 }
 \arguments{
 \item{RawDat}{Matrix. Supports standard matrix or sparse matrix. 
@@ -33,7 +33,7 @@ calculated using package \code{DropletUtils}'s method. If
 \code{upper = Inf}, no barcodes will be retained prior to testing. 
 If manually specified, it should be greater than pooling threshold.}
 
-\item{RemoveProtein}{Logical. Default: \code{TRUE}. For 10X Cell Ranger 
+\item{RemoveProtein}{Logical. Default: \code{TRUE}. For 10x Cell Ranger 
 version >=3, extra features (surface proteins) besides genes 
 are measured simultaneously. If \code{RemoveProtein = TRUE}, only genes 
 are used for testing. Removing extra features are recommended
@@ -47,7 +47,7 @@ of empty droplets.}
 \item{Ncores}{Positive integer. Default: \code{detectCores() - 2}. 
 Number of cores for parallel computation.}
 
-\item{PrintProg}{Logical. Default: \code{TRUE}. If \code{PrintProg = TRUE}, 
+\item{verbose}{Logical. Default: \code{TRUE}. If \code{verbose = TRUE}, 
 progressing messages will be printed.}
 }
 \value{

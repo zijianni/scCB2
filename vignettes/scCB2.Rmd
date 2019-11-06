@@ -1,12 +1,12 @@
 ---
-title: "CB2: A cluster-based approach for distinguishing cells from background barcodes in 10X Genomics Data"
+title: "CB2: A cluster-based approach for distinguishing cells from background barcodes in 10x Genomics data"
 author: "Zijian Ni and Christina Kendziorski"
 package: scCB2
-date: 08/02/2019
+date: 11/03/2019
 output: 
     BiocStyle::html_document
 vignette: >
-    %\VignetteIndexEntry{CB2: A cluster-based approach for distinguishing cells from background barcodes in 10X Genomics Data}
+    %\VignetteIndexEntry{CB2: A cluster-based approach for distinguishing cells from background barcodes in 10x Genomics data}
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteEncoding{UTF-8}  
 ---
@@ -23,11 +23,49 @@ opts_chunk$set(error=FALSE, message=FALSE, warning=FALSE)
 Droplet-based single cell RNA-seq technologies provide a novel insight in transcriptome profiles of individual cells with a much larger cell numbers and cheaper cost compared with microfluidic-based single cell RNA-seq. During library preparation, each cell is expected to be captured by one droplet. The number of droplets are usually much more than the number of cells, thus most droplets do not contain real cells. However, there are always free-floating RNA fragments in the library due to broken cells or library contamination. Empty droplets will capture them and have non-zero expression values after sequencing.
 
 
-**CB2** is a cluster-based approach for distinguishing true cells from background barcodes in droplet-based single cell RNA-seq experiments (especially for 10X Chromium output), while `scCB2` is its corresponding R package. It is based on clustering similar barcodes and calculating Monte-Carlo p-value for each cluster to test against background distribution. This cluster-level test outperforms single-barcode-level tests not only for high count barcodes, but also in dealing with low count barcodes and homogeneous sequencing library, while keeping FDR well controlled.
+**CB2** is a cluster-based approach for distinguishing true cells from background barcodes in droplet-based single cell RNA-seq experiments (especially for 10x Chromium output), while `scCB2` is its corresponding R package. It is based on clustering similar barcodes and calculating Monte-Carlo p-value for each cluster to test against background distribution. This cluster-level test outperforms single-barcode-level tests not only for high count barcodes, but also in dealing with low count barcodes and homogeneous sequencing library, while keeping FDR well controlled.
 
-#Read count matrix from 10X output
+#Quick Start
 
-Currently, the most commonly used droplet-based protocol is 10X Chromium. Our package provides handy functions to directly read 10X Cell Ranger output files and generate feature-by-barcode count matrix into R. Public 10X datasets can be found [here](https://www.10xgenomics.com/resources/datasets). We use [1k Brain Cells from an E18 Mouse](http://cf.10xgenomics.com/samples/cell-exp/2.1.0/neurons_900/neurons_900_raw_gene_bc_matrices.tar.gz) as the example in this vignette. 
+##Installation
+
+Under R console, install package `scCB2` via GitHub (https://github.com/zijianni/scCB2):
+
+```{r, eval=FALSE}
+if(!require(devtools))
+    install.packages("devtools")
+
+if(!require(scCB2))
+    devtools::install_github("zijianni/scCB2", build_manual = TRUE, build_vignettes = TRUE)
+
+```
+
+Note: building vignettes might take ~10 minutes.
+
+##All-in-one function
+
+`QuickCB2` is an all-in-one function to apply CB2 on 10x Cell Ranger raw data and get a matrix of real cells identified by CB2 under default settings. By specifying `AsSeurat = TRUE`, a Seurat object is returned so that users can directly apply Seurat pipeline for downstream analyses.
+
+Usage: 
+```{r, eval=FALSE}
+library(scCB2)
+
+#If raw data has three separate files within one directory
+#and you want to control FDR at 0.1%:
+RealCell <-  QuickCB2(dir = "/path/to/raw/data/directory", FDR_threshold = 0.001, AsSeurat = FALSE)
+
+#If raw data is in HDF5 format and 
+#you'd like a Seurat object under default FDR threshold:
+RealCell_S <-  QuickCB2(h5file = "/path/to/raw/data/HDF5", AsSeurat = TRUE)
+```
+
+An example illustrating how it really works and what the final output looks like can be found at the end of *Detailed Steps*.
+
+#Detailed Steps
+
+##Read count matrix from 10x output raw data
+
+Currently, the most widely-used droplet-based protocol is 10x Chromium. Our package provides handy functions to directly read 10x Cell Ranger output files and generate feature-by-barcode count matrix into R. Public 10x datasets can be found [here](https://www.10xgenomics.com/resources/datasets). We use [1k Brain Cells from an E18 Mouse](http://cf.10xgenomics.com/samples/cell-exp/2.1.0/neurons_900/neurons_900_raw_gene_bc_matrices.tar.gz) as the example in this vignette. 
 
 ```{r}
 library(scCB2)
@@ -39,16 +77,16 @@ data.dir <- file.path(data.dir,"raw_gene_bc_matrices","mm10")
 list.files(data.dir)
 ```
 
-The raw data from 10X Cell Ranger output contains "barcodes.tsv", "genes.tsv" and "matrix.mtx". For Cell Ranger version >=3, the output files are "barcodes.tsv.gz", "features.tsv.gz" and "matrix.mtx.gz". We first read these files into R and generate the feature-by-barcode count matrix.
+The raw data from 10x Cell Ranger output contains "barcodes.tsv", "genes.tsv" and "matrix.mtx". For Cell Ranger version >=3, the output files are "barcodes.tsv.gz", "features.tsv.gz" and "matrix.mtx.gz". We first read these files into R and generate the feature-by-barcode count matrix.
 
 ```{r}
-mbrain1k <- Read10X(data.dir)
+mbrain1k <- Read10xRaw(data.dir)
 str(mbrain1k)
 ```
 
-If raw data is not from 10X Chromium pipeline, user may manually create the feature-by-barcode count matrix with rows representing genes and columns representing barcodes. Gene and barcode IDs should be unique. The format of count matrix can be either sparse matrix or standard matrix.
+If raw data is not from 10x Chromium pipeline, user may manually create the feature-by-barcode count matrix with rows representing genes and columns representing barcodes. Gene and barcode IDs should be unique. The format of count matrix can be either sparse matrix or standard matrix.
 
-#Run **CB2** to distinguish real cells from empty droplets
+##Run **CB2** to distinguish real cells from empty droplets
 
 We use the first 50,000 barcodes to reduce problem size. 
 
@@ -67,11 +105,11 @@ The main function `CB2FindCell` takes raw count matrix as input and return real 
 
 ```{r}
 CBOut <- CB2FindCell(mbrainSub, FDR_threshold = 0.01, 
-    lower = 100, Ncores = 2, PrintProg = TRUE)
+    lower = 100, Ncores = 2, verbose = TRUE)
 summary(CBOut)
 ```
 
-#Extract real cell matrix
+##Extract real cell matrix
 
 If readers are not interested in the output testing information, `GetCellMat` can extract real cell matrix directly from `CB2FindCell` output. It also provides a filtering option to remove broken cells based on proportion of mitochondrial gene expressions. Now we apply `GetCellMat` on `CBOut`, filtering out cells whose mitochondrial proportions are greater than 0.05 (Default: 1, No filtering).
 
@@ -80,7 +118,7 @@ RealCell <- GetCellMat(CBOut, MTfilter = 0.05)
 str(RealCell)
 ```
 
-#Downstream analysis
+##Downstream analysis
 
 After `CB2` pre-processing, real cell matrix is still in matrix format, so it can be directly followed by downstream statistical analysis. For example, if we want to use *Seurat* pipeline, we can easily create a Seurat object using
 
@@ -90,7 +128,16 @@ SeuratObj <- Seurat::CreateSeuratObject(counts = RealCell,
 SeuratObj
 ```
 
-Now it's ready for downstream analysis such as normalization and cell type clustering. Example Seurat tutorial: https://satijalab.org/seurat/v3.1/pbmc3k_tutorial.html
+##All-in-one function
+
+Under default parameters, we can directly use all-in-one function `QuickCB2` to get real cell matrix from 10x raw data. Note: Due to randomness and high-mitochondrial barcode filtering, `RealCell_Quick` is not the same as `RealCell`.
+
+```{r}
+RealCell_Quick <- QuickCB2(dir = data.dir, Ncores = 2)
+str(RealCell_Quick)
+```
+
+Now it's ready for downstream analysis such as normalization and clustering. Example Seurat tutorial: https://satijalab.org/seurat/v3.1/pbmc3k_tutorial.html
 
 #Session Information
 ```{r}
@@ -99,4 +146,4 @@ sessionInfo()
 
 #Citation
 
-Please cite our paper:
+Our paper is under review. This section will be updated once we publish it.

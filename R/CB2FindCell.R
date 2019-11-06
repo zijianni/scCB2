@@ -28,7 +28,7 @@
 #' \code{upper = Inf}, no barcodes will be retained prior to testing. 
 #' If manually specified, it should be greater than pooling threshold. 
 #' 
-#' @param RemoveProtein Logical. Default: \code{TRUE}. For 10X Cell Ranger 
+#' @param RemoveProtein Logical. Default: \code{TRUE}. For 10x Cell Ranger 
 #' version >=3, extra features (surface proteins) besides genes 
 #' are measured simultaneously. If \code{RemoveProtein = TRUE}, only genes 
 #' are used for testing. Removing extra features are recommended
@@ -42,7 +42,7 @@
 #' @param Ncores Positive integer. Default: \code{detectCores() - 2}. 
 #' Number of cores for parallel computation.
 #' 
-#' @param PrintProg Logical. Default: \code{TRUE}. If \code{PrintProg = TRUE}, 
+#' @param verbose Logical. Default: \code{TRUE}. If \code{verbose = TRUE}, 
 #' progressing messages will be printed.
 #'
 #' @return A list of (1) real cell barcode matrix distinguished during 
@@ -115,15 +115,18 @@ CB2FindCell <- function(RawDat,
                         upper = NULL,
                         RemoveProtein = TRUE,
                         Ncores = detectCores() - 2,
-                        PrintProg = TRUE) {
+                        verbose = TRUE) {
     time_begin <- Sys.time()
+    
+    if(!(is(RawDat,"matrix") | is(RawDat,"dgCMatrix")))
+        stop("Incorrect raw data format.")
     
     if (any(duplicated(colnames(RawDat))))
         stop("Detected duplicated barcode ID.")
     if (any(duplicated(rownames(RawDat))))
         stop("Detected duplicated gene ID.")
     
-    if (PrintProg) {
+    if (verbose) {
         message("FDR threshold: ", FDR_threshold)
         message("Lower threshold: ", lower)
         message("Cores allocated: ", Ncores, "\n")
@@ -133,9 +136,9 @@ CB2FindCell <- function(RawDat,
         Ncores <- 1
     
     #############filter proteins, 0-expressed genes and barcodes
-    if (PrintProg)
+    if (verbose)
         message("(1/5) Filtering empty barcodes and features in raw data...")
-    if (!is(RawDat, "dgCMatrix")) {
+    if (is(RawDat, "matrix")) {
         RawDat <- as(RawDat, "dgCMatrix")
     }
     
@@ -162,12 +165,12 @@ CB2FindCell <- function(RawDat,
         }
         
         if (is.null(upper_temp)) {
-            stop("Failed to calculate knee point. Probably not enough barcodes.")
+            stop("Probably not enough barcodes to calculate knee point.")
         }
         upper <- upper_temp
     }
     
-    if (PrintProg) {
+    if (verbose) {
         message("Upper threshold: ", upper)
     }
     if(upper <= lower){
@@ -208,12 +211,12 @@ CB2FindCell <- function(RawDat,
         cor(x, null_prob)
     }
     
-    if (PrintProg)
+    if (verbose)
         message("Done.\n")
     
     ####################estimate test statistic for all barcodes
     
-    if (PrintProg)
+    if (verbose)
         message("(2/5) Calculating test statistics for barcodes...")
     
     dat_Cor <-
@@ -224,13 +227,13 @@ CB2FindCell <- function(RawDat,
     dat_temp <- data.frame(cbind(dat_Cor, colSums(dat)))
     #Here the test statistic is correlation, but 
     #we name it as logLH for step 5 use.
-    if (PrintProg)
+    if (verbose)
     colnames(dat_temp) <- c("logLH", "count") 
         message("Done.\n")
     
     ###############################construct clusters
     clust_mat <- NULL
-    if (PrintProg) {
+    if (verbose) {
         message("(3/5) Constructing highly-correlated clusters...")
     }
     
@@ -250,7 +253,7 @@ CB2FindCell <- function(RawDat,
         diag(c_mat) <- NA
         c_threshold[bg] <- mean(c_mat, na.rm = TRUE)
     }
-    if(PrintProg){
+    if(verbose){
         message("Baseline clustering threshold: ",round(c_threshold[2],3))
     }
     c_size_int <- as.numeric(names(output_cl_raw$stat))%/%100
@@ -270,13 +273,13 @@ CB2FindCell <- function(RawDat,
         
     if(is.null(output_cl$barcode)){
         warning("Failed to construct any cluster. Skipping to Step 5.")
-        if(PrintProg){
-            message("Does raw data have too few barcodes to construct clusters?\n")
-            message("Is there overexpressed outlier gene? Removal recommended.\n")
+        if(verbose){
+            message("Raw data may not have enough barcodes for clustering.\n")
+            message("Also check for and remove outlier overexpressed gene.\n")
         }
         cl_temp <- NULL
     } else{
-        if (PrintProg)
+        if (verbose)
             message("Done.\n")
         ##############estimate test statistic for every cluster
         cl_Cor <- output_cl$stat
@@ -289,7 +292,7 @@ CB2FindCell <- function(RawDat,
         
         clust_b <- unlist(output_cl$barcode)
         ##############################cluster test
-        if (PrintProg)
+        if (verbose)
             message("(4/5) Calculating empirical p-value for each cluster...")
         
         cand_count <- sort(unique(cl_temp$count))
@@ -347,19 +350,19 @@ CB2FindCell <- function(RawDat,
             dat_temp <- dat_temp[setdiff(colnames(dat), res_b),]
         }
         
-        if (PrintProg)
+        if (verbose)
             message("Done.\n")
         
     }
     ##########Permute null distribution of the test statistic
-    if (PrintProg)
+    if (verbose)
         message("(5/5) Calculating empirical p-value for each barcode...")
     
     if ((ncol(dat)) == 0) {
-        if (PrintProg)
+        if (verbose)
             message("\nNo remaining individual barcodes.
                     \nAll finished.\n")
-        if (PrintProg)
+        if (verbose)
             print(Sys.time() - time_begin)
         return(
             list(
@@ -383,7 +386,7 @@ CB2FindCell <- function(RawDat,
             cand_barcode[ifelse(is.na(ED_out$FDR), FALSE,
                                 ED_out$FDR <= FDR_threshold)]
         cell_mat <- RawDat[, cell_barcode]
-        if (PrintProg){
+        if (verbose){
             message("Done.\n")
             message("All finished.\n")
             print(Sys.time() - time_begin)
@@ -610,7 +613,7 @@ c_entropy <- function(prob){
 #package DropletUtils. We fixed a minor bug causing returned knee point
 #being larger than actual knee point. We also moved the smooth spline fitting
 #to the beginning to avoid unstable knee point estimation when lower threshold
-#changes. For its origin, see 
+#changes. For its original script, see 
 #https://github.com/MarioniLab/DropletUtils/blob/master/R/barcodeRanks.R
 Calc_upper <- function(dat,lower){
     dat <- FilterGB(dat)
@@ -630,9 +633,9 @@ Calc_upper <- function(dat,lower){
     x <- log10(run.rank[keep])
     fit <- smooth.spline(log10(run.rank), log10(run.totals), df=20)
     y <- predict(fit)$y[keep]
-    #y <- log10(run.totals[keep])
     # Numerical differentiation to identify bounds for spline fitting.
-    # The upper/lower bounds are defined at the plateau and inflection, respectively.
+    # The upper/lower bounds are defined at the 
+    # plateau and inflection, respectively.
     d1n <- diff(y)/diff(x)
     right.edge <- which.min(d1n)
     left.edge <- which.max(d1n[seq_len(right.edge)])
@@ -640,7 +643,8 @@ Calc_upper <- function(dat,lower){
     # This allows us to get a decent fit with low df for stable differentiation.
     new.keep <- left.edge:right.edge
     # Smoothing to avoid error multiplication upon differentiation.
-    # Minimizing the signed curvature and returning the total for the knee point.
+    # Minimizing the signed curvature and returning 
+    # the total for the knee point.
     d1 <- predict(fit, deriv=1)$y[keep][new.keep]
     d2 <- predict(fit, deriv=2)$y[keep][new.keep]
     curvature <- d2/(1 + d1^2)^1.5

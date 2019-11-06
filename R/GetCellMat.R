@@ -6,23 +6,40 @@
 #'
 #' @param CBout Output object from \code{CB2FindCell}.
 #'
-#' @param MTfilter Numeric value between 0 to 1. Default: \code{1} 
-#' (No filtering). Mitochondrial gene expression proportion filtering 
-#' threshold for broken cells. The proportion of mitochondrial gene
-#' expressions is calculated from the scaled sum of all genes starting 
-#' with "MT-" (human) or "mt-" (mouse).
+#' @param MTfilter Numeric value between 0 and 1. Default: \code{1} 
+#' (No filtering). For each barcode, if the proportion of mitochondrial 
+#' gene expression exceeds `MTfilter`, this barcode will be filtered out.
+#' No barcode exceeds 100% mitochondrial gene expression, thus the default
+#' (100%) corresponds to no filtering. The proportion of mitochondrial 
+#' gene expressions is usually a criterion for evaluating cell quality, 
+#' and is calculated using the scaled sum of all genes starting 
+#' with "MT-" (human) or "mt-" (mouse) if row names are gene symbols, 
+#' or customized mitochondrial genes specified by `MTgene`.
 #'
 #' @param MTgene Character vector. User may specify customized mitochondrial
-#' gene IDs to perform the filtering.
+#' gene IDs to perform the filtering. This should correspond to a subset 
+#' of row names in raw data.
 #'
 #' @return A \code{dgCMatrix} count matrix of real cells.
 #'
 #' @examples
+#' 
+#' # Please also refer to the example in function \code{CB2FindCell}.
+#' 
+#' # Simulate \code{CB2FindCell} output object.
 #' data(mbrainSub)
-#' CBOut <- CB2FindCell(mbrainSub, FDR_threshold = 0.01,
-#'     lower = 100, Ncores = 2)
-#' RealCell <- GetCellMat(CBOut, MTfilter = 0.05)
-#' str(RealCell)
+#' mbrainReal <- mbrainSub[,Matrix::colSums(mbrainSub)>500]
+#' CBOut <- data.frame(
+#'  cluster_matrix = mbrainReal[,
+#'  sample(ncol(mbrainReal), 100, replace = TRUE)],
+#'  cell_matrix = mbrainReal[,
+#'  sample(ncol(mbrainReal), 100, replace = TRUE)])
+#'                  
+#' # Get cell matrix, filtering out barcodes with 
+#' # more than 10% of counts from mitochondrial genes.     
+#' 
+#' RealCell <- GetCellMat(CBOut, MTfilter = 0.1)
+#' str(RealCell)             
 #'
 #' @export
 
@@ -38,7 +55,7 @@ GetCellMat <- function(CBout,
         MTgene <- c(grep(pattern = "\\<MT-", x = rownames(xmat)),
                     grep(pattern = "\\<mt-", x = rownames(xmat)))
     } else if (!all(is.character(MTgene))) {
-        stop("\"MTgene\" should be a character vector of gene names.")
+        stop("\"MTgene\" should be a character vector of row names.")
     }
     if (length(MTgene) > 0) {
         MTprop <- colSums(xmat[MTgene,]) / colSums(xmat)
