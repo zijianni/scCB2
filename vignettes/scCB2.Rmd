@@ -2,7 +2,7 @@
 title: "CB2: A cluster-based approach for distinguishing cells from background barcodes in 10x Genomics data"
 author: "Zijian Ni and Christina Kendziorski"
 package: scCB2
-date: 11/03/2019
+date: 11/07/2019
 output: 
     BiocStyle::html_document
 vignette: >
@@ -32,11 +32,10 @@ Droplet-based single cell RNA-seq technologies provide a novel insight in transc
 Under R console, install package `scCB2` via GitHub (https://github.com/zijianni/scCB2):
 
 ```{r, eval=FALSE}
-if(!require(devtools))
+if(!requireNamespace(devtools, quietly = TRUE))
     install.packages("devtools")
 
-if(!require(scCB2))
-    devtools::install_github("zijianni/scCB2", build_manual = TRUE, build_vignettes = TRUE)
+devtools::install_github("zijianni/scCB2", build_manual = TRUE, build_vignettes = TRUE)
 
 ```
 
