@@ -145,4 +145,4 @@ sessionInfo()
 
 #Citation
 
-Our paper is under review. This section will be updated once we publish it.
+Ni. Z., Chen, S., Brown, J., Kendziorski, C. (2019). CB2 distinguishes cells from background barcodes in 10x Genomics data. bioRxiv doi: 10.1101/832535
