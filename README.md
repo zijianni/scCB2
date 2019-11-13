@@ -15,3 +15,9 @@ devtools::install_github("zijianni/scCB2", build_manual = TRUE, build_vignettes 
 ``
 
 (coming soon) Install via Bioconductor: `BiocManager::install("scCB2")`
+
+After installing, you will find package vignettes by `vignette("scCB2")`.
+
+## Citation
+
+Ni. Z., Chen, S., Brown, J., Kendziorski, C. (2019). CB2 distinguishes cells from background barcodes in 10x Genomics data. bioRxiv doi: 10.1101/832535
