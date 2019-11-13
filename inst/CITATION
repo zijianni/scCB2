@@ -1,12 +1,12 @@
 bibentry(
-    bibtype = "Article",
-    title = "XXX",
+    bibtype = "Preprint",
+    title = "CB2 distinguishes cells from background barcodes in 10x Genomics data",
     author = c(
         person("Zijian", "Ni"),
+        person("Shuyang", "Chen"),
+        person("Jared", "Brown"),
         person("Christina", "Kendziorski")),
-    journal = "XXX",
+    journal = "bioRxiv",
     year = "2019",
-    volume = "XX",
-    pages = "XX",
-    doi = "XX"
+    doi = "10.1101/832535"
 )
