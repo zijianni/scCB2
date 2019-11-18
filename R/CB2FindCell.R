@@ -1,5 +1,5 @@
-#' Distinguish real cells from empty droplets using clustering-based 
-#' Monte-Carlo test.
+#' Main function of distinguish real cells from empty droplets using 
+#' clustering-based Monte-Carlo test
 #'
 #' The main function of \code{scCB2} package. Distinguish real cells 
 #' from empty droplets using clustering-based Monte-Carlo test. 

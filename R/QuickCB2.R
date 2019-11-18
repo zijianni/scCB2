@@ -1,4 +1,4 @@
-#' All-in-one function for \code{scCB2}.
+#' All-in-one function from raw data to filtered cell matrix
 #'
 #' All-in-one function for \code{scCB2}. Take 10x output raw data as input 
 #' and return either a matrix of real cells identified by CB2 or 

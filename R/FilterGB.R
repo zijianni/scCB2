@@ -1,4 +1,4 @@
-#' Filter out low count genes and barcodes from count matrix.
+#' Filter out low count genes and barcodes from count matrix
 #' 
 #' This function is used for filtering out low count genes and barcodes 
 #' from count matrix based on total gene expression count (row sums) and 
