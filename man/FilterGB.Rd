@@ -2,7 +2,7 @@
 % Please edit documentation in R/FilterGB.R
 \name{FilterGB}
 \alias{FilterGB}
-\title{Filter out low count genes and barcodes from count matrix.}
+\title{Filter out low count genes and barcodes from count matrix}
 \usage{
 FilterGB(dat, g_threshold = 0, b_threshold = 0)
 }

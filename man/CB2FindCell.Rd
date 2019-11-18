@@ -2,8 +2,8 @@
 % Please edit documentation in R/CB2FindCell.R
 \name{CB2FindCell}
 \alias{CB2FindCell}
-\title{Distinguish real cells from empty droplets using clustering-based 
-Monte-Carlo test.}
+\title{Main function of distinguish real cells from empty droplets using 
+clustering-based Monte-Carlo test}
 \usage{
 CB2FindCell(RawDat, FDR_threshold = 0.01, lower = 100, upper = NULL,
   RemoveProtein = TRUE, Ncores = detectCores() - 2, verbose = TRUE)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/QuickCB2.R
 \name{QuickCB2}
 \alias{QuickCB2}
-\title{All-in-one function for \code{scCB2}.}
+\title{All-in-one function from raw data to filtered cell matrix}
 \usage{
 QuickCB2(dir = NULL, h5file = NULL, FDR_threshold = 0.01,
   AsSeurat = FALSE, Ncores = detectCores() - 2, ...)
