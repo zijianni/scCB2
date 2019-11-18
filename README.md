@@ -14,6 +14,8 @@ if(!requireNamespace(devtools, quietly = TRUE))
 devtools::install_github("zijianni/scCB2", build_manual = TRUE, build_vignettes = TRUE)
 ``
 
+Note: This may take a few minutes for building vignettes.
+
 (coming soon) Install via Bioconductor: `BiocManager::install("scCB2")`
 
 After installing, you will find package vignettes by `vignette("scCB2")`.
