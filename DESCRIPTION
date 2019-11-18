@@ -4,8 +4,8 @@ Date: 2019/11/1
 Title: CB2: A cluster-based approach for distinguishing cells from background barcodes in 10x Genomics data 
 Authors@R: c(
     person("Zijian", "Ni", role = c("aut", "cre"), email = "zni25@wisc.edu"), 
-    person("Christina", "Kendziorski", role="ctb"),
-    person("Shuyang", "Chen", role="ctb"))
+    person("Shuyang", "Chen", role="ctb"),
+    person("Christina", "Kendziorski", role="ctb"))
 Depends: 
     R (>= 3.6.0)
 Imports: 

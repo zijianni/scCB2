@@ -24,9 +24,9 @@
 #'
 #' @examples
 #' 
-#' # Please also refer to the example in function \code{CB2FindCell}.
+#' # Please also refer to the example in function CB2FindCell.
 #' 
-#' # Simulate \code{CB2FindCell} output object.
+#' # Simulate CB2FindCell output object.
 #' data(mbrainSub)
 #' mbrainReal <- mbrainSub[,Matrix::colSums(mbrainSub)>500]
 #' CBOut <- data.frame(
