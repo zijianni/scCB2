@@ -14,7 +14,7 @@ if(!requireNamespace(devtools, quietly = TRUE))
 devtools::install_github("zijianni/scCB2", build_manual = TRUE, build_vignettes = TRUE)
 ``
 
-Note: This may take a few minutes for building vignettes.
+Note: This may take a few minutes for building vignettes. If you don't need vignettes (which rarely happens), set `build_vignettes = FALSE`.
 
 After installing, you will find package vignettes by `vignette("scCB2")`.
 
