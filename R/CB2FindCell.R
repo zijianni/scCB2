@@ -19,7 +19,7 @@
 #' get reasonable number of cells. Recommended sequencing depth for this 
 #' default threshold: 40,000~80,000 reads per cell.
 #' 
-#' @param upper Positive numeric. Default: \code{NULL}. This is the upper 
+#' @param upper Positive integer. Default: \code{NULL}. This is the upper 
 #' threshold for large barcodes. All barcodes whose total counts are larger 
 #' or equal to upper threshold are directly classified as real cells prior 
 #' to testing. If \code{upper = NULL}, the knee point of the log rank curve 
