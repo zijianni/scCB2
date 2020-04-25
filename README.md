@@ -9,7 +9,7 @@ Droplet-based single cell RNA-seq technologies provide a novel insight in transc
 Install via Github into R using `devtools`:
 
 ``
-if(!requireNamespace(devtools, quietly = TRUE))
+if(!requireNamespace("devtools", quietly = TRUE))
     install.packages("devtools")
 devtools::install_github("zijianni/scCB2", build_manual = TRUE, build_vignettes = TRUE)
 ``
