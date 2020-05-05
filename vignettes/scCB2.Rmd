@@ -62,7 +62,7 @@ An example illustrating how it really works and what the final output looks like
 
 ##Running Speed
 
-The computational speed is related to the size and structure of input datasets. As a reference, scCB2 running on a medium-size dataset (around 8,000 cells and 20,000 genes) using 6 cores takes less than 10 minutes.
+The computational speed is related to the size and structure of input datasets. As a reference, scCB2 running on a medium-size dataset (around 30,000 genes and 8,000 cells after cell calling) using 6 cores takes less than 10 minutes.
 
 #Detailed Steps
 
