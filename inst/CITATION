@@ -1,12 +1,12 @@
 bibentry(
-    bibtype = "Preprint",
-    title = "CB2 distinguishes cells from background barcodes in 10x Genomics data",
+    bibtype = "Article",
+    title = "CB2 improves power of cell detection in droplet-based single-cell RNA sequencing data",
     author = c(
         person("Zijian", "Ni"),
         person("Shuyang", "Chen"),
         person("Jared", "Brown"),
         person("Christina", "Kendziorski")),
-    journal = "bioRxiv",
-    year = "2019",
-    doi = "10.1101/832535"
+    journal = "Genome Biology",
+    year = "2020",
+    doi = "xxxxxx"
 )

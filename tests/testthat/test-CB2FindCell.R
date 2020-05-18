@@ -1,7 +1,10 @@
 data(mbrainSub)
 
-for(lower in c(50, 100)){
-    for(upper in c(500, 1000)){
+# Only tested one upper and lower threshold due to 
+# Bioconductor time limits
+
+for(lower in c(100)){
+    for(upper in c(1000)){
         CBOut_temp <- CB2FindCell(mbrainSub,
                                 lower = lower, 
                                 upper = upper,

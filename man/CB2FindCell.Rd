@@ -5,8 +5,15 @@
 \title{Main function of distinguish real cells from empty droplets using 
 clustering-based Monte-Carlo test}
 \usage{
-CB2FindCell(RawDat, FDR_threshold = 0.01, lower = 100, upper = NULL,
-  RemoveProtein = TRUE, Ncores = detectCores() - 2, verbose = TRUE)
+CB2FindCell(
+  RawDat,
+  FDR_threshold = 0.01,
+  lower = 100,
+  upper = NULL,
+  RemoveProtein = TRUE,
+  Ncores = detectCores() - 2,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{RawDat}{Matrix. Supports standard matrix or sparse matrix. 
@@ -24,7 +31,7 @@ than usual, this threshold can be leveled up (down) correspondingly to
 get reasonable number of cells. Recommended sequencing depth for this 
 default threshold: 40,000~80,000 reads per cell.}
 
-\item{upper}{Positive numeric. Default: \code{NULL}. This is the upper 
+\item{upper}{Positive integer. Default: \code{NULL}. This is the upper 
 threshold for large barcodes. All barcodes whose total counts are larger 
 or equal to upper threshold are directly classified as real cells prior 
 to testing. If \code{upper = NULL}, the knee point of the log rank curve 

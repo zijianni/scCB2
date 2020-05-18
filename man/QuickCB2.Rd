@@ -4,8 +4,14 @@
 \alias{QuickCB2}
 \title{All-in-one function from raw data to filtered cell matrix}
 \usage{
-QuickCB2(dir = NULL, h5file = NULL, FDR_threshold = 0.01,
-  AsSeurat = FALSE, Ncores = detectCores() - 2, ...)
+QuickCB2(
+  dir = NULL,
+  h5file = NULL,
+  FDR_threshold = 0.01,
+  AsSeurat = FALSE,
+  Ncores = detectCores() - 2,
+  ...
+)
 }
 \arguments{
 \item{dir}{The directory of 10x output data. For Cell Ranger version <3,
