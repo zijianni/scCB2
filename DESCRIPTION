@@ -21,13 +21,13 @@ Imports:
     doParallel,
     iterators,
     foreach,
+    BiocStyle,
     Seurat
 Suggests: 
     testthat (>= 2.1.0),
     KernSmooth,
     beachmat,
     knitr,
-    BiocStyle,
     rmarkdown
 biocViews:
     DataImport,
