@@ -42,7 +42,7 @@ BiocManager::install("scCB2")
 ### Option 2: From GitHub source code using `devtools`
 
 ```{r, eval=FALSE}
-if(!requireNamespace(devtools, quietly = TRUE))
+if(!requireNamespace("devtools", quietly = TRUE))
     install.packages("devtools")
 
 devtools::install_github("zijianni/scCB2", build_manual = TRUE, build_vignettes = TRUE)
