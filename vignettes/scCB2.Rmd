@@ -159,4 +159,4 @@ sessionInfo()
 
 # Citation
 
-Ni. Z., Chen, S., Brown, J., Kendziorski, C. (2019). CB2 distinguishes cells from background barcodes in 10x Genomics data. bioRxiv doi: 10.1101/832535
+Ni. Z., Chen, S., Brown, J., Kendziorski, C. (2020). CB2 improves power of cell detection in droplet-based single-cell RNA sequencing data. Genome Biology doi: xxxxxx
