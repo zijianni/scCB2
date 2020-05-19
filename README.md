@@ -23,7 +23,7 @@ After installing, you will find package vignettes by `vignette("scCB2")`.
 (coming soon) Install via Bioconductor: `BiocManager::install("scCB2")`
 
 ## Vignettes 
-[v0.99.17](https://htmlpreview.github.io/?https://github.com/zijianni/scCB2_temp_vignette/blob/master/scCB2.html)
+[v0.99.18](https://htmlpreview.github.io/?https://github.com/zijianni/scCB2_temp_vignette/blob/master/scCB2.html)
 
 
 
