@@ -17,13 +17,13 @@
 #' 
 #' @param MTfilter Numeric value between 0 and 1. Default: \code{1} 
 #' (No filtering). For each barcode, if the proportion of mitochondrial 
-#' gene expression exceeds `MTfilter`, this barcode will be filtered out.
-#' No barcode exceeds 100% mitochondrial gene expression, thus the default
-#' (100%) corresponds to no filtering. The proportion of mitochondrial 
+#' gene expression exceeds \code{MTfilter}, this barcode will be filtered out.
+#' No barcode exceeds 100\% mitochondrial gene expression, thus the default
+#' (100\%) corresponds to no filtering. The proportion of mitochondrial 
 #' gene expressions is usually a criterion for evaluating cell quality, 
 #' and is calculated using the scaled sum of all genes starting 
 #' with "MT-" (human) or "mt-" (mouse) if row names are gene symbols, 
-#' or customized mitochondrial genes specified by `MTgene`.
+#' or customized mitochondrial genes specified by \code{MTgene}.
 #'
 #' @param MTgene Character vector. User may specify customized mitochondrial
 #' gene IDs to perform the filtering. This should correspond to a subset 
