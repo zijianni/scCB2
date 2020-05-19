@@ -58,4 +58,13 @@
 
 ---------------------
 
-* Initial version to submit to Bioconductor.
+* Initial version preparing to submit to Bioconductor.
+
+## scCB2 0.99.18
+
+---------------------
+
+* Minor bug fix.
+* Minor edits on package vignettes.
+
+

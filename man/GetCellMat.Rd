@@ -2,12 +2,14 @@
 % Please edit documentation in R/GetCellMat.R
 \name{GetCellMat}
 \alias{GetCellMat}
-\title{Extract real cell matrix from \code{CB2FindCell} output}
+\title{Extract real cell matrix from \code{CB2FindCell} output and optionally
+filter out low-quality cells}
 \usage{
 GetCellMat(CBout, MTfilter = 1, MTgene = NULL)
 }
 \arguments{
-\item{CBout}{Output object from \code{CB2FindCell}.}
+\item{CBout}{Output object from \code{CB2FindCell}, or a sparse matrix 
+(for example, from \code{QuickCB2}).}
 
 \item{MTfilter}{Numeric value between 0 and 1. Default: \code{1} 
 (No filtering). For each barcode, if the proportion of mitochondrial 
@@ -28,8 +30,9 @@ A \code{dgCMatrix} count matrix of real cells.
 }
 \description{
 Handy function to extract real cell matrix from \code{CB2FindCell} output. 
-It also provides the option to filter out broken cells based on proportion 
-of mitochondrial gene expressions.
+It provides the option to filter out broken cells based on proportion 
+of mitochondrial gene expressions. The input can also be a sparse matrix
+only for cell filtering.
 }
 \examples{
 

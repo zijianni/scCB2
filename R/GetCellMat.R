@@ -1,10 +1,13 @@
-#' Extract real cell matrix from \code{CB2FindCell} output
+#' Extract real cell matrix from \code{CB2FindCell} output and optionally
+#' filter out low-quality cells
 #'
 #' Handy function to extract real cell matrix from \code{CB2FindCell} output. 
-#' It also provides the option to filter out broken cells based on proportion 
-#' of mitochondrial gene expressions.
+#' It provides the option to filter out broken cells based on proportion 
+#' of mitochondrial gene expressions. The input can also be a sparse matrix
+#' only for cell filtering.
 #'
-#' @param CBout Output object from \code{CB2FindCell}.
+#' @param CBout Output object from \code{CB2FindCell}, or a sparse matrix 
+#' (for example, from \code{QuickCB2}).
 #'
 #' @param MTfilter Numeric value between 0 and 1. Default: \code{1} 
 #' (No filtering). For each barcode, if the proportion of mitochondrial 
@@ -50,7 +53,13 @@ GetCellMat <- function(CBout,
     if (!(is.numeric(MTfilter) && MTfilter >= 0 && MTfilter <= 1)) {
         stop("\"MTfilter\" should be a numeric value between 0 and 1.")
     }
-    xmat <- cbind(CBout$cluster_matrix, CBout$cell_matrix)
+    
+    if(is.list(CBout)){
+        xmat <- cbind(CBout$cluster_matrix, CBout$cell_matrix)
+    }else{
+        xmat <- CBout
+    }
+
     if (is.null(MTgene)) {
         MTgene <- c(grep(pattern = "\\<MT-", x = rownames(xmat)),
                     grep(pattern = "\\<mt-", x = rownames(xmat)))

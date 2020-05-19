@@ -8,6 +8,8 @@ QuickCB2(
   dir = NULL,
   h5file = NULL,
   FDR_threshold = 0.01,
+  MTfilter = 1,
+  MTgene = NULL,
   AsSeurat = FALSE,
   Ncores = detectCores() - 2,
   ...
@@ -23,6 +25,20 @@ files: barcodes.tsv.gz, features.tsv.gz, matrix.mtx.gz.}
 
 \item{FDR_threshold}{Numeric between 0 and 1. Default: 0.01. 
 The False Discovery Rate (FDR) to be controlled for multiple testing.}
+
+\item{MTfilter}{Numeric value between 0 and 1. Default: \code{1} 
+(No filtering). For each barcode, if the proportion of mitochondrial 
+gene expression exceeds `MTfilter`, this barcode will be filtered out.
+No barcode exceeds 100% mitochondrial gene expression, thus the default
+(100%) corresponds to no filtering. The proportion of mitochondrial 
+gene expressions is usually a criterion for evaluating cell quality, 
+and is calculated using the scaled sum of all genes starting 
+with "MT-" (human) or "mt-" (mouse) if row names are gene symbols, 
+or customized mitochondrial genes specified by `MTgene`.}
+
+\item{MTgene}{Character vector. User may specify customized mitochondrial
+gene IDs to perform the filtering. This should correspond to a subset 
+of row names in raw data.}
 
 \item{AsSeurat}{Logical. Default: \code{FALSE}. Decides whether a Seurat
 object is returned instead of cell matrix. Set to \code{TRUE} so that 

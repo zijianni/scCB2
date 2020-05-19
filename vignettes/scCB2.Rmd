@@ -2,7 +2,7 @@
 title: "CB2: A cluster-based approach for distinguishing cells from background barcodes in 10x Genomics data"
 author: "Zijian Ni and Christina Kendziorski"
 package: scCB2
-date: 05/17/2020
+date: 05/18/2020
 output: 
     BiocStyle::html_document
 vignette: >
@@ -60,8 +60,8 @@ Usage:
 library(scCB2)
 
 #If raw data has three separate files within one directory
-#and you want to control FDR at 0.1%:
-RealCell <-  QuickCB2(dir = "/path/to/raw/data/directory", FDR_threshold = 0.001, AsSeurat = FALSE)
+#and you want to control FDR at the default 1%:
+RealCell <-  QuickCB2(dir = "/path/to/raw/data/directory")
 
 #If raw data is in HDF5 format and 
 #you'd like a Seurat object under default FDR threshold:
@@ -73,6 +73,15 @@ An example illustrating how it really works and what the final output looks like
 ## Running Speed
 
 The computational speed is related to the size and structure of input datasets. As a reference, scCB2 running on a medium-size dataset (around 30,000 genes and 8,000 cells after cell calling) using 6 cores takes less than 10 minutes.
+
+## Saving a sparse matrix to 10x format
+
+For users who would like to save the CB2 output cell matrix to 10x format (e.g. "matrix.mtx", "barcodes.tsv" and "genes.tsv"), there are existing packages to help. For example in package `DropletUtils`:
+
+```{r, eval=FALSE}
+DropletUtils::write10xCounts(path = "/path/to/save/data",
+                             x = RealCell)
+```
 
 # Detailed Steps
 
@@ -114,20 +123,19 @@ data(mbrainSub)
 dim(mbrainSub)
 ```
 
-The main function `CB2FindCell` takes raw count matrix as input and return real cells, test statistics and p-values. Now we apply `CB2FindCell` on `mbrainSub`, controlling FDR at 0.01 level (Default: 0.01), assuming all barcodes with total count less or equals 100 are background empty droplets (Default: 100), using 2 cores parallel computation (Default: number of total cores in the machine minus 2). For detailed information, see `?CB2FindCell`.
+The main function `CB2FindCell` takes raw count matrix as input and return real cells, test statistics and p-values. Now we apply `CB2FindCell` on `mbrainSub`, controlling FDR at 0.01 level (Default), assuming all barcodes with total count less or equals 100 are background empty droplets (Default), using 2 cores parallel computation (Default: number of total cores in the machine minus 2). For detailed information, see `?CB2FindCell`.
 
 ```{r}
-CBOut <- CB2FindCell(mbrainSub, FDR_threshold = 0.01, 
-    lower = 100, Ncores = 2, verbose = TRUE)
+CBOut <- CB2FindCell(mbrainSub, Ncores = 2)
 summary(CBOut)
 ```
 
 ## Extract real cell matrix
 
-If readers are not interested in the output testing information, `GetCellMat` can extract real cell matrix directly from `CB2FindCell` output. It also provides a filtering option to remove broken cells based on proportion of mitochondrial gene expressions. Now we apply `GetCellMat` on `CBOut`, filtering out cells whose mitochondrial proportions are greater than 0.05 (Default: 1, No filtering).
+If readers are not interested in the output testing information, `GetCellMat` can extract real cell matrix directly from `CB2FindCell` output. It also provides a filtering option to remove broken cells based on proportion of mitochondrial gene expressions. Now we apply `GetCellMat` on `CBOut`, filtering out cells whose mitochondrial proportions are greater than 0.25 (Default: 1, No filtering).
 
 ```{r}
-RealCell <- GetCellMat(CBOut, MTfilter = 0.05)
+RealCell <- GetCellMat(CBOut, MTfilter = 0.25)
 str(RealCell)
 ```
 
@@ -143,7 +151,7 @@ SeuratObj
 
 ## All-in-one function
 
-Under default parameters, we can directly use all-in-one function `QuickCB2` to get real cell matrix from 10x raw data. Note: Due to randomness and high-mitochondrial barcode filtering, `RealCell_Quick` is not the same as `RealCell`.
+Under default parameters, we can directly use all-in-one function `QuickCB2` to get real cell matrix from 10x raw data. 
 
 ```{r}
 RealCell_Quick <- QuickCB2(dir = data.dir, Ncores = 2)
