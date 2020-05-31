@@ -67,4 +67,8 @@
 * Minor bug fix.
 * Minor edits on package vignettes.
 
+## scCB2 0.99.19
 
+---------------------
+
+* Minor edits on package vignettes.
