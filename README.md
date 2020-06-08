@@ -23,10 +23,10 @@ After installing, you will find package vignettes by `vignette("scCB2")`.
 (coming soon) Install via Bioconductor: `BiocManager::install("scCB2")`
 
 ## Vignettes 
-[v0.99.19](https://htmlpreview.github.io/?https://github.com/zijianni/scCB2_temp_vignette/blob/master/scCB2.html)
+[v0.99.20](https://htmlpreview.github.io/?https://github.com/zijianni/scCB2_temp_vignette/blob/master/scCB2.html)
 
 
 
 ## Citation
 
-Ni. Z., Chen, S., Brown, J., Kendziorski, C. (2020). CB2 improves power of cell detection in droplet-based single-cell RNA sequencing data. Genome Biology doi: xxxxxx
+Ni, Z., Chen, S., Brown, J., & Kendziorski, C. (2020). CB2 improves power of cell detection in droplet-based single-cell RNA sequencing data. Genome Biology, 21(1), 137. https://doi.org/10.1186/s13059-020-02054-8

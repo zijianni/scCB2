@@ -8,5 +8,5 @@ bibentry(
         person("Christina", "Kendziorski")),
     journal = "Genome Biology",
     year = "2020",
-    doi = "xxxxxx"
+    doi = "10.1186/s13059-020-02054-8"
 )

@@ -72,3 +72,10 @@
 ---------------------
 
 * Minor edits on package vignettes.
+
+## scCB2 0.99.20
+
+---------------------
+
+* Updated citation.
+
