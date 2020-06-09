@@ -153,7 +153,7 @@ Read10xRawH5 <- function(h5file,
             sparseMatrix(
                 i = data.temp$indices,
                 p = data.temp$indptr,
-                x = data.temp$data,
+                x = as.numeric(data.temp$data),
                 index1 = FALSE,
                 dims = data.temp$shape
             )

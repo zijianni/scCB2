@@ -1,5 +1,5 @@
-hgmmh5 <- "~/Google Drive/Hallu/DATA/10x/testReadFunctions/hgmm100/hgmm_100_raw_gene_bc_matrices_h5.h5"
-hg19 <- "~/Google Drive/Hallu/DATA/10x/testReadFunctions/hgmm100/raw_gene_bc_matrices/hg19/"
+hgmmh5 <- "/path/to/h5/file.h5"
+hg19 <- "/path/to/folder/"
 
 
 test_that("Both directory and HDF5 are used", {

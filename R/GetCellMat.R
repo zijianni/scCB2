@@ -32,7 +32,7 @@
 #' # Simulate CB2FindCell output object.
 #' data(mbrainSub)
 #' mbrainReal <- mbrainSub[,Matrix::colSums(mbrainSub)>500]
-#' CBOut <- data.frame(
+#' CBOut <- list(
 #'  cluster_matrix = mbrainReal[,
 #'  sample(ncol(mbrainReal), 100, replace = TRUE)],
 #'  cell_matrix = mbrainReal[,

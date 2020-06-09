@@ -79,3 +79,9 @@
 
 * Updated citation.
 
+## scCB2 0.99.21
+
+---------------------
+
+* Updated testthat scripts.
+* Minor bug fix in Read10xRaw.R. Added as.numeric when building sparse matrix.

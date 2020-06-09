@@ -1,25 +1,32 @@
-hgmmh5 <- "~/Google Drive/Hallu/DATA/10x/testReadFunctions/hgmm100/hgmm_100_raw_gene_bc_matrices_h5.h5"
-hg19 <- "~/Google Drive/Hallu/DATA/10x/testReadFunctions/hgmm100/raw_gene_bc_matrices/hg19/"
-pbmch5 <- "~/Google Drive/Hallu/DATA/10x/testReadFunctions/PBMC5K/5k_pbmc_v3_filtered_feature_bc_matrix.h5"
-pbmc <- "~/Google Drive/Hallu/DATA/10x/testReadFunctions/PBMC5K/filtered_feature_bc_matrix/"
+data("mbrainSub")
+
+data.dir <- file.path(tempdir(), "CB2_testthat")
+H5.dir <- file.path(tempdir(), "CB2_testthat_H5")
+
+if (dir.exists(data.dir)) {
+    unlink(data.dir, recursive = TRUE)
+}
+if (file.exists(H5.dir)) {
+    file.remove(H5.dir)
+}
+
+DropletUtils::write10xCounts(data.dir, mbrainSub, type = "sparse",
+                             version = "2")
+DropletUtils::write10xCounts(H5.dir, mbrainSub, type = "HDF5",
+                             version = "3")
+
 
 test_that("Directory/files existence", {
-    expect_error(Read10xRaw("~/a"),"Directory does not exist")
-    expect_error(Read10xRaw("~"),"No 10x output file detected")
+    expect_error(Read10xRaw(paste0(data.dir,"/foo")), 
+                 "Directory does not exist")
+    expect_error(Read10xRaw(tempdir()), "No 10x output file detected")
 })
 
 test_that("Data loading", {
-    expect_identical(Read10xRaw(hg19),Read10xRawH5(hgmmh5)$hg19)
-    expect_identical(Read10xRaw(pbmc),Read10xRawH5(pbmch5))
-})
-
-test_that("Use gene ID", {
-    expect_match( rownames(Read10xRaw(hg19,row.name = "id")),"ENSG")
-    expect_match( rownames(Read10xRaw(pbmc,row.name = "id")),"ENSG")
+    expect_identical(Read10xRaw(data.dir), Read10xRawH5(H5.dir))
 })
 
 
 test_that("Metadata loading", {
-    expect_true(is.list(Read10xRaw(hg19,meta = TRUE)))
-    expect_true(is.list(Read10xRaw(pbmc,meta = TRUE)))
+    expect_true(is.list(Read10xRaw(data.dir, meta = TRUE)))
 })
