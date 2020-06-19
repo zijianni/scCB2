@@ -51,22 +51,30 @@
 #' 
 #' @examples
 #' 
-#' # Since this function is a combination of others, to avoid duplication
-#' # please refer to the help pages of other functions 
-#' # for runnable examples. 
+#' # simulate 10x output files
+#' data(mbrainSub)
+#' mbrainSub <- mbrainSub[,1:10000]
+#' data_dir <- file.path(tempdir(),"CB2example")
+#' dir.create(data_dir)
+#' gene_name <- rownames(mbrainSub)
 #' 
-#' \dontrun{
+#' # For simplicity, use gene names to generate gene IDs to fit the format.
+#' gene_id <- paste0("ENSG_fake_",gene_name)
+#' barcode_id <- colnames(mbrainSub)
+#' Matrix::writeMM(mbrainSub,file = file.path(data_dir,"matrix.mtx"))
+#' write.table(barcode_id,file = file.path(data_dir,"barcodes.tsv"),
+#'     sep = "\t", quote = FALSE, col.names = FALSE, row.names = FALSE)
+#' write.table(cbind(gene_id,gene_name),file = file.path(data_dir,"genes.tsv"),
+#'     sep = "\t", quote = FALSE, col.names = FALSE, row.names = FALSE)
 #' 
-#' # Run CB2 on 10x raw data and get cell matrix.
-#' # Control FDR at 0.1%. Use 4-core parallel computation.
+#' # Run QuickCB2 on 10x raw data and get cell matrix.
+#' # Control FDR at 1%. Use 2-core parallel computation.
 #' 
-#' RealCell <- QuickCB2(dir = "path/to/raw/data/directory", 
-#'                      FDR_threshold = 0.001,
-#'                      Ncores = 4)
+#' RealCell <- QuickCB2(dir = data_dir, 
+#'                      FDR_threshold = 0.01,
+#'                      Ncores = 2)
 #' str(RealCell)
-#' }
 #' 
-#' @import BiocStyle
 #' @importFrom Seurat CreateSeuratObject
 #' @importFrom parallel detectCores
 #' @export
@@ -77,7 +85,7 @@ QuickCB2 <- function(dir = NULL,
                     MTfilter = 1,
                     MTgene = NULL,
                     AsSeurat = FALSE, 
-                    Ncores = detectCores() - 2,
+                    Ncores = 2,
                     ...){
 
     message("Loading data...")

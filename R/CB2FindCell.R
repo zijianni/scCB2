@@ -45,16 +45,16 @@
 #' @param verbose Logical. Default: \code{TRUE}. If \code{verbose = TRUE}, 
 #' progressing messages will be printed.
 #'
-#' @return A list of (1) real cell barcode matrix distinguished during 
-#' cluster-level test, (2) real cell barcode matrix 
-#' distinguished during single-barcode-level 
-#' test plus large cells who exceed upper threshold, (3) testing statistics 
-#' (Pearson correlation to the background) for all candidate barcode clusters, 
-#' (4) barcode IDs for all candidate barcode clusters, the name of each cluster 
-#' is its median barcode size, (5) testing statistics 
-#' (log likelihood under background distribution) for remaining single 
-#' barcodes not clustered, (6) background distribution count vector,
-#' without Good-Turing correction.
+#' @return An object of class \code{SummarizedExperiment}. The slot 
+#' \code{assays} contains the real cell barcode matrix distinguished during 
+#' cluster-level test, single-barcode-level test plus large cells who 
+#' exceed the upper threshold. The slot \code{metadata} contains
+#' (1) testing statistics (Pearson correlation to the background) for all 
+#' candidate barcode clusters, (2) barcode IDs for all candidate barcode 
+#' clusters, the name of each cluster is its median barcode size, 
+#' (3) testing statistics (log likelihood under background distribution) 
+#' for remaining single barcodes not clustered, (4) background distribution 
+#' count vector without Good-Turing correction.
 #' 
 #' @details 
 #' 
@@ -86,8 +86,8 @@
 #' data(mbrainSub)
 #' str(mbrainSub)
 #' 
-#' # run CB2
-#' CBOut <- CB2FindCell(mbrainSub, FDR_threshold = 0.01, 
+#' # run CB2 on the first 10000 barcodes
+#' CBOut <- CB2FindCell(mbrainSub[,1:10000], FDR_threshold = 0.01, 
 #'     lower = 100, Ncores = 2)
 #' RealCell <- GetCellMat(CBOut, MTfilter = 0.05)
 #' 
@@ -98,6 +98,7 @@
 #' @import foreach
 #' @import parallel
 #' @import SingleCellExperiment
+#' @import SummarizedExperiment
 #' @import Matrix
 #' @importFrom DropletUtils emptyDrops
 #' @importFrom edgeR goodTuringProportions
@@ -114,7 +115,7 @@ CB2FindCell <- function(RawDat,
                         lower = 100,
                         upper = NULL,
                         RemoveProtein = TRUE,
-                        Ncores = detectCores() - 2,
+                        Ncores = 2,
                         verbose = TRUE) {
     time_begin <- Sys.time()
     
@@ -364,15 +365,13 @@ CB2FindCell <- function(RawDat,
                     \nAll finished.\n")
         if (verbose)
             print(Sys.time() - time_begin)
-        return(
-            list(
-                cluster_matrix = clust_mat,
-                cell_matrix = upper_mat,
-                ClusterStat = cl_temp,
-                Cluster = output_cl$barcode,
-                background = null_count
-            )
-        )
+        
+        se_out <- SummarizedExperiment(
+            list(cell_matrix = cbind(upper_mat,clust_mat)),
+            metadata=list(ClusterStat = cl_temp,
+                          Cluster = output_cl$barcode,
+                          background = null_count))
+        return(se_out)
 
     } else{
         cand_barcode <- c(colnames(cbind(dat,B0)), 
@@ -391,17 +390,13 @@ CB2FindCell <- function(RawDat,
             message("All finished.\n")
             print(Sys.time() - time_begin)
         }
-
-        return(
-            list(
-                cluster_matrix = clust_mat,
-                cell_matrix = cell_mat,
-                ClusterStat = cl_temp,
-                Cluster = output_cl$barcode,
-                BarcodeStat = dat_temp,
-                background = null_count
-            )
-        )
+        se_out <- SummarizedExperiment(
+            list(cell_matrix = cbind(cell_mat,clust_mat)),
+            metadata=list(ClusterStat = cl_temp,
+                          Cluster = output_cl$barcode,
+                          BarcodeStat = dat_temp,
+                          background = null_count))
+        return(se_out)
     }
 }
 

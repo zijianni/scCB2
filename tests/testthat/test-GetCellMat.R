@@ -1,14 +1,13 @@
 data(mbrainSub)
+library(SummarizedExperiment)
 
 mbrainReal <- mbrainSub[, Matrix::colSums(mbrainSub) > 500]
-CBOut <- list(cluster_matrix = mbrainReal[,
-                    sample(ncol(mbrainReal), 100, replace = TRUE)],
-                    cell_matrix = mbrainReal[,
-                    sample(ncol(mbrainReal), 100, replace = TRUE)])
-
+CBOut <- SummarizedExperiment(
+    list(cell_matrix = mbrainReal[,sample(ncol(mbrainReal), 
+                                          200, replace = TRUE)]))
 
 test_that("Output matrix format", {
-    expect_identical(class(GetCellMat(CBOut)), class(CBOut$cell_matrix))
+    expect_identical(class(GetCellMat(CBOut)), class(assay(CBOut)))
 })
 
 test_that("Mitochondrial filtering", {
@@ -16,7 +15,7 @@ test_that("Mitochondrial filtering", {
                  "invalid character indexing")
     expect_error(GetCellMat(CBOut, MTfilter = -1), "between 0 and 1")
     
-    MTgene <- sample(rownames(CBOut$cell_matrix), 10)
+    MTgene <- sample(rownames(assay(CBOut)), 10)
     for (k in c(0.5, 0.1, 0.01, 0.001, 0)) {
         CBMat <- GetCellMat(CBOut, k, MTgene)
         MTprop <-

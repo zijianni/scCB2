@@ -85,3 +85,14 @@
 
 * Updated testthat scripts.
 * Minor bug fix in Read10xRaw.R. Added as.numeric when building sparse matrix.
+
+## scCB2 0.99.22
+
+---------------------
+
+* Received comments from Bioconductor reviewer.
+* Moved `BiocStyle` from `Imports:` to `Suggests:`.
+* Modified vignettes. Deleted GitHub installation instruction.
+* Changed default value of `Ncores` to be 2.
+* Changed output of `CB2FindCell` to be an `SummarizedExperiment` object. Changed `GetCellMat` accordingly. Changed examples and testthat accordingly.
+

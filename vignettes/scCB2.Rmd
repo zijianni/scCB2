@@ -2,7 +2,7 @@
 title: "CB2: A cluster-based approach for distinguishing cells from background barcodes in 10x Genomics data"
 authors: "Zijian Ni and Christina Kendziorski"
 package: scCB2
-date: 05/30/2020
+date: 06/18/2020
 output: 
     BiocStyle::html_document
 vignette: >
@@ -45,7 +45,7 @@ The GetCellMat function in `scCB2` may be used toward this end.
 
 ## Installation
 
-### Option 1 (recommended): From Bioconductor
+Install from Bioconductor:
 
 ```{r, eval=FALSE}
 if (!requireNamespace("BiocManager", quietly = TRUE))
@@ -55,18 +55,6 @@ BiocManager::install("scCB2")
 
 ```
 
-### Option 2: From GitHub source code using `devtools`
-
-```{r, eval=FALSE}
-if(!requireNamespace("devtools", quietly = TRUE))
-    install.packages("devtools")
-
-devtools::install_github("zijianni/scCB2", build_manual = TRUE, build_vignettes = TRUE)
-
-```
-
-Note: building vignettes may take ~10 minutes.
-
 ## All-in-one function
 
 `QuickCB2` is an all-in-one function to apply CB2 on 10x Cell Ranger raw data and get a matrix of real cells identified by CB2 under default settings. By specifying `AsSeurat = TRUE`, a Seurat object is returned so that users can directly apply the Seurat pipeline for downstream analyses.
@@ -75,13 +63,14 @@ Usage:
 ```{r, eval=FALSE}
 library(scCB2)
 
-#If raw data has three separate files within one directory
-#and you want to control FDR at the default 1%:
+# If raw data has three separate files within one directory
+# and you want to control FDR at the default 1%:
 RealCell <-  QuickCB2(dir = "/path/to/raw/data/directory")
 
-#If raw data is in HDF5 format and 
-#you'd like a Seurat object under default FDR threshold:
-RealCell_S <-  QuickCB2(h5file = "/path/to/raw/data/HDF5", AsSeurat = TRUE)
+# If raw data is in HDF5 format and 
+# you'd like a Seurat object under default FDR threshold:
+RealCell_S <-  QuickCB2(h5file = "/path/to/raw/data/HDF5", 
+                        AsSeurat = TRUE)
 ```
 
 An example illustrating how it works and what the final output looks like can be found at the end of *Detailed Steps*.
@@ -107,10 +96,14 @@ Currently, the most widely-used droplet-based protocol is 10x Chromium. Our pack
 
 ```{r}
 library(scCB2)
+library(SummarizedExperiment)
+
 data.dir <- file.path(tempdir(),"CB2_example")
 dir.create(data.dir)
-download.file("http://cf.10xgenomics.com/samples/cell-exp/2.1.0/neurons_900/neurons_900_raw_gene_bc_matrices.tar.gz", destfile = file.path(data.dir,"neurons_900_raw_gene_bc_matrices.tar.gz"))
-untar(file.path(data.dir,"neurons_900_raw_gene_bc_matrices.tar.gz"),exdir = data.dir)
+download.file("http://cf.10xgenomics.com/samples/cell-exp/2.1.0/neurons_900/neurons_900_raw_gene_bc_matrices.tar.gz", 
+              destfile = file.path(data.dir,"neurons_900_raw_gene_bc_matrices.tar.gz"))
+untar(file.path(data.dir,"neurons_900_raw_gene_bc_matrices.tar.gz"),
+      exdir = data.dir)
 data.dir <- file.path(data.dir,"raw_gene_bc_matrices","mm10")
 list.files(data.dir)
 ```
@@ -143,7 +136,8 @@ The main function `CB2FindCell` takes a raw count matrix as input and returns re
 
 ```{r}
 CBOut <- CB2FindCell(mbrainSub, Ncores = 2)
-summary(CBOut)
+str(assay(CBOut)) # cell matrix
+str(metadata(CBOut)) # test statistics, p-values, etc
 ```
 
 ## Extract real cell matrix
@@ -161,7 +155,7 @@ After `CB2` pre-processing, the real cell matrix is still in matrix format, so i
 
 ```{r}
 SeuratObj <- Seurat::CreateSeuratObject(counts = RealCell, 
-    project = "mbrain_example")
+                                        project = "mbrain_example")
 SeuratObj
 ```
 

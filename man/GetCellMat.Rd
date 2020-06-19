@@ -39,13 +39,13 @@ only for cell filtering.
 # Please also refer to the example in function CB2FindCell.
 
 # Simulate CB2FindCell output object.
+library(SummarizedExperiment)
 data(mbrainSub)
 mbrainReal <- mbrainSub[,Matrix::colSums(mbrainSub)>500]
-CBOut <- list(
- cluster_matrix = mbrainReal[,
- sample(ncol(mbrainReal), 100, replace = TRUE)],
- cell_matrix = mbrainReal[,
- sample(ncol(mbrainReal), 100, replace = TRUE)])
+
+CBOut <- SummarizedExperiment(
+    list(cell_matrix = mbrainReal[,sample(ncol(mbrainReal), 
+                                          200, replace = TRUE)]))
                  
 # Get cell matrix, filtering out barcodes with 
 # more than 10\% of counts from mitochondrial genes.     

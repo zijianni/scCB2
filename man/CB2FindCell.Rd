@@ -11,7 +11,7 @@ CB2FindCell(
   lower = 100,
   upper = NULL,
   RemoveProtein = TRUE,
-  Ncores = detectCores() - 2,
+  Ncores = 2,
   verbose = TRUE
 )
 }
@@ -58,16 +58,16 @@ Number of cores for parallel computation.}
 progressing messages will be printed.}
 }
 \value{
-A list of (1) real cell barcode matrix distinguished during 
-cluster-level test, (2) real cell barcode matrix 
-distinguished during single-barcode-level 
-test plus large cells who exceed upper threshold, (3) testing statistics 
-(Pearson correlation to the background) for all candidate barcode clusters, 
-(4) barcode IDs for all candidate barcode clusters, the name of each cluster 
-is its median barcode size, (5) testing statistics 
-(log likelihood under background distribution) for remaining single 
-barcodes not clustered, (6) background distribution count vector,
-without Good-Turing correction.
+An object of class \code{SummarizedExperiment}. The slot 
+\code{assays} contains the real cell barcode matrix distinguished during 
+cluster-level test, single-barcode-level test plus large cells who 
+exceed the upper threshold. The slot \code{metadata} contains
+(1) testing statistics (Pearson correlation to the background) for all 
+candidate barcode clusters, (2) barcode IDs for all candidate barcode 
+clusters, the name of each cluster is its median barcode size, 
+(3) testing statistics (log likelihood under background distribution) 
+for remaining single barcodes not clustered, (4) background distribution 
+count vector without Good-Turing correction.
 }
 \description{
 The main function of \code{scCB2} package. Distinguish real cells 
@@ -102,8 +102,8 @@ RNA-Seq study.
 data(mbrainSub)
 str(mbrainSub)
 
-# run CB2
-CBOut <- CB2FindCell(mbrainSub, FDR_threshold = 0.01, 
+# run CB2 on the first 10000 barcodes
+CBOut <- CB2FindCell(mbrainSub[,1:10000], FDR_threshold = 0.01, 
     lower = 100, Ncores = 2)
 RealCell <- GetCellMat(CBOut, MTfilter = 0.05)
 

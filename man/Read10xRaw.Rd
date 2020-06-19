@@ -44,8 +44,8 @@ Cell Ranger version.
 
 # simulate 10x output files
 data(mbrainSub)
-dir.create(file.path(tempdir(),"CB2example"))
 data_dir <- file.path(tempdir(),"CB2example")
+dir.create(data_dir)
 gene_name <- rownames(mbrainSub)
 
 # For simplicity, use gene names to generate gene IDs to fit the format.
