@@ -96,3 +96,8 @@
 * Changed default value of `Ncores` to be 2.
 * Changed output of `CB2FindCell` to be an `SummarizedExperiment` object. Changed `GetCellMat` accordingly. Changed examples and testthat accordingly.
 
+## scCB2 0.99.23
+
+---------------------
+
+* Minor edit of README.md
