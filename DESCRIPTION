@@ -7,7 +7,7 @@ Authors@R: c(
     person("Shuyang", "Chen", role="ctb"),
     person("Christina", "Kendziorski", role="ctb"))
 Depends: 
-    R (>= 4.0)
+    R (>= 3.6)
 Imports: 
     SingleCellExperiment,
     SummarizedExperiment,
