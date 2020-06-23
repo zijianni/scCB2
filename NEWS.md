@@ -109,3 +109,9 @@
 * Removed direct download files in vignettes to speed up building.
 * Changed R dependencies so that package can be built in older R versions.
 * Changed vignette title to match the citation.
+
+## scCB2 0.99.25
+
+---------------------
+
+* Changed R dependency back to 4.0.0.
