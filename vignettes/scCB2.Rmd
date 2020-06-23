@@ -1,12 +1,12 @@
 ---
-title: "CB2: A cluster-based approach for distinguishing cells from background barcodes in 10x Genomics data"
+title: "CB2 improves power of cell detection in droplet-based single-cell RNA sequencing data"
 authors: "Zijian Ni and Christina Kendziorski"
 package: scCB2
-date: 06/18/2020
+date: 06/23/2020
 output: 
     BiocStyle::html_document
 vignette: >
-    %\VignetteIndexEntry{CB2: A cluster-based approach for distinguishing cells from background barcodes in 10x Genomics data}
+    %\VignetteIndexEntry{CB2 improves power of cell detection in droplet-based single-cell RNA sequencing data}
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteEncoding{UTF-8}  
 ---
@@ -92,45 +92,36 @@ DropletUtils::write10xCounts(path = "/path/to/save/data",
 
 ## Read count matrix from 10x output raw data
 
-Currently, the most widely-used droplet-based protocol is 10x Chromium. Our package provides functions to directly read 10x Cell Ranger output files and generate a feature-by-barcode count matrix that may be read into R. Public 10x datasets can be found [here](https://www.10xgenomics.com/resources/datasets). We use [1k Brain Cells from an E18 Mouse](http://cf.10xgenomics.com/samples/cell-exp/2.1.0/neurons_900/neurons_900_raw_gene_bc_matrices.tar.gz) as the example in this vignette. 
+Currently, the most widely-used droplet-based protocol is 10x Chromium. Our package provides functions to directly read 10x Cell Ranger output files and generate a feature-by-barcode count matrix that may be read into R. Public 10x datasets can be found [here](https://www.10xgenomics.com/resources/datasets). 
+
+Our package contains a small subset of 10x data, `mbrainSub`, corresponding to the first 50,000 barcodes of [1k Brain Cells from an E18 Mouse](http://cf.10xgenomics.com/samples/cell-exp/2.1.0/neurons_900/neurons_900_raw_gene_bc_matrices.tar.gz).
+
+We first generate 10x output files of `mbrainSub`, then read it using our built-in functions.
 
 ```{r}
 library(scCB2)
 library(SummarizedExperiment)
 
+data(mbrainSub)
+
 data.dir <- file.path(tempdir(),"CB2_example")
-dir.create(data.dir)
-download.file("http://cf.10xgenomics.com/samples/cell-exp/2.1.0/neurons_900/neurons_900_raw_gene_bc_matrices.tar.gz", 
-              destfile = file.path(data.dir,"neurons_900_raw_gene_bc_matrices.tar.gz"))
-untar(file.path(data.dir,"neurons_900_raw_gene_bc_matrices.tar.gz"),
-      exdir = data.dir)
-data.dir <- file.path(data.dir,"raw_gene_bc_matrices","mm10")
+DropletUtils::write10xCounts(data.dir,
+                             mbrainSub,
+                             version = "3")
+
 list.files(data.dir)
 ```
 
-The raw data from 10x Cell Ranger output contains "barcodes.tsv", "genes.tsv" and "matrix.mtx". For Cell Ranger version >=3, the output files are "barcodes.tsv.gz", "features.tsv.gz" and "matrix.mtx.gz". We first read these files into R and generate the feature-by-barcode count matrix.
+For Cell Ranger version <3, the raw data from 10x Cell Ranger output contains "barcodes.tsv", "genes.tsv" and "matrix.mtx". For Cell Ranger version >=3, the output files are "barcodes.tsv.gz", "features.tsv.gz" and "matrix.mtx.gz". We now read these files back into R and compare with original data matrix.
 
 ```{r}
-mbrain1k <- Read10xRaw(data.dir)
-str(mbrain1k)
+mbrainSub_2 <- Read10xRaw(data.dir)
+identical(mbrainSub, mbrainSub_2)
 ```
 
 If raw data is not from the 10x Chromium pipeline, a user may manually create the feature-by-barcode count matrix with rows representing genes and columns representing barcodes. Gene and barcode IDs should be unique. The format of the count matrix can be either a sparse matrix or standard matrix.
 
 ## Run **CB2** to distinguish real cells from empty droplets
-
-We use the first 50,000 barcodes.
-
-```{r}
-mbrainSub <- mbrain1k[,1:50000]
-```
-
-For readers who have not downloaded raw data in the previous step, this matrix is also integrated into the package and can be loaded using
-
-```{r}
-data(mbrainSub)
-dim(mbrainSub)
-```
 
 The main function `CB2FindCell` takes a raw count matrix as input and returns real cells, test statistics, and p-values. Now we apply `CB2FindCell` on `mbrainSub`, controlling FDR at 0.01 level (Default), assuming all barcodes with total count less than or equal to 100 are background empty droplets (Default), using 2 cores parallel computation (Default: number of total cores in the machine minus 2). For detailed information, see `?CB2FindCell`.
 

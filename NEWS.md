@@ -101,3 +101,11 @@
 ---------------------
 
 * Minor edit of README.md
+
+## scCB2 0.99.24
+
+---------------------
+
+* Removed direct download files in vignettes to speed up building.
+* Changed R dependencies so that package can be built in older R versions.
+* Changed vignette title to match the citation.
