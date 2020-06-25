@@ -5,8 +5,15 @@
 \title{Main function of distinguish real cells from empty droplets using 
 clustering-based Monte-Carlo test}
 \usage{
-CB2FindCell(RawDat, FDR_threshold = 0.01, lower = 100, upper = NULL,
-  RemoveProtein = TRUE, Ncores = 2, verbose = TRUE)
+CB2FindCell(
+  RawDat,
+  FDR_threshold = 0.01,
+  lower = 100,
+  upper = NULL,
+  RemoveProtein = TRUE,
+  Ncores = 2,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{RawDat}{Matrix. Supports standard matrix or sparse matrix. 

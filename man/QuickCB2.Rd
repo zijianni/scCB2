@@ -4,8 +4,16 @@
 \alias{QuickCB2}
 \title{All-in-one function from raw data to filtered cell matrix}
 \usage{
-QuickCB2(dir = NULL, h5file = NULL, FDR_threshold = 0.01,
-  MTfilter = 1, MTgene = NULL, AsSeurat = FALSE, Ncores = 2, ...)
+QuickCB2(
+  dir = NULL,
+  h5file = NULL,
+  FDR_threshold = 0.01,
+  MTfilter = 1,
+  MTgene = NULL,
+  AsSeurat = FALSE,
+  Ncores = 2,
+  ...
+)
 }
 \arguments{
 \item{dir}{The directory of 10x output data. For Cell Ranger version <3,
@@ -71,9 +79,9 @@ gene_id <- paste0("ENSG_fake_",gene_name)
 barcode_id <- colnames(mbrainSub)
 Matrix::writeMM(mbrainSub,file = file.path(data_dir,"matrix.mtx"))
 write.table(barcode_id,file = file.path(data_dir,"barcodes.tsv"),
-    sep = "\\t", quote = FALSE, col.names = FALSE, row.names = FALSE)
+    sep = "\t", quote = FALSE, col.names = FALSE, row.names = FALSE)
 write.table(cbind(gene_id,gene_name),file = file.path(data_dir,"genes.tsv"),
-    sep = "\\t", quote = FALSE, col.names = FALSE, row.names = FALSE)
+    sep = "\t", quote = FALSE, col.names = FALSE, row.names = FALSE)
 
 # Run QuickCB2 on 10x raw data and get cell matrix.
 # Control FDR at 1\%. Use 2-core parallel computation.

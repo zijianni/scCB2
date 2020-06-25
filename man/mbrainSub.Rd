@@ -4,7 +4,9 @@
 \name{mbrainSub}
 \alias{mbrainSub}
 \title{Subset of 1k Brain Cells from an E18 Mouse}
-\format{An object of class \code{"dgCMatrix"}.}
+\format{
+An object of class \code{"dgCMatrix"}.
+}
 \source{
 \href{http://cf.10xgenomics.com/samples/cell-exp/2.1.0/neurons_900}{1k Brain Cells from an E18 Mouse}
 }

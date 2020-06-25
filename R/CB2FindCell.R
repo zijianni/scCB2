@@ -190,7 +190,7 @@ CB2FindCell <- function(RawDat,
     bc <- colSums(dat_filter)
     if (any(bc >= upper)) {
         upper_cell <- names(bc)[bc >= upper]
-        upper_mat <- RawDat[, upper_cell, drop = FALSE]
+        upper_mat <- RawDat[, upper_cell]
         dat_filter <- FilterGB(dat_filter[,bc < upper], 0, 0)
     }else{
         upper_mat <- NULL
@@ -207,7 +207,7 @@ CB2FindCell <- function(RawDat,
     c_prob <- null_prob
     
     if (any(bc >= upper)) {
-        upper_count <- rowSums(upper_mat[rownames(B0),,drop = FALSE])
+        upper_count <- rowSums(upper_mat[rownames(B0),])
         upper_prob <- goodTuringProportions(upper_count)[,1]
         
         if(c_entropy(null_prob)<=c_entropy(upper_prob)){

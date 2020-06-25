@@ -53,9 +53,9 @@ gene_id <- paste0("ENSG_fake_",gene_name)
 barcode_id <- colnames(mbrainSub)
 Matrix::writeMM(mbrainSub,file = file.path(data_dir,"matrix.mtx"))
 write.table(barcode_id,file = file.path(data_dir,"barcodes.tsv"),
-    sep = "\\t", quote = FALSE, col.names = FALSE, row.names = FALSE)
+    sep = "\t", quote = FALSE, col.names = FALSE, row.names = FALSE)
 write.table(cbind(gene_id,gene_name),file = file.path(data_dir,"genes.tsv"),
-    sep = "\\t", quote = FALSE, col.names = FALSE, row.names = FALSE)
+    sep = "\t", quote = FALSE, col.names = FALSE, row.names = FALSE)
 
 # read files
 list.files(data_dir)
