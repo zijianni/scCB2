@@ -206,7 +206,9 @@ CB2FindCell <- function(RawDat,
     null_prob <- goodTuringProportions(null_count)[,1]
     c_prob <- null_prob
     
-    if (any(bc >= upper)) {
+    # Check entropy of large cells only when there are 
+    # at least 10 cells above the upper threshold
+    if (sum(bc >= upper)>=10) {
         upper_count <- rowSums(upper_mat[rownames(B0),])
         upper_prob <- goodTuringProportions(upper_count)[,1]
         
