@@ -190,7 +190,7 @@ CB2FindCell <- function(RawDat,
     bc <- colSums(dat_filter)
     if (any(bc >= upper)) {
         upper_cell <- names(bc)[bc >= upper]
-        upper_mat <- RawDat[, upper_cell]
+        upper_mat <- RawDat[, upper_cell, drop=FALSE]
         dat_filter <- FilterGB(dat_filter[,bc < upper], 0, 0)
     }else{
         upper_mat <- NULL
