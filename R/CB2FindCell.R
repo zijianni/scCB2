@@ -158,15 +158,18 @@ CB2FindCell <- function(RawDat,
     if (is.null(upper)) {
         
         brank <- Calc_upper(dat_filter, lower = lower)
+        step_size <- (brank$knee-brank$inflection)/10
         #check convergence of knee point
         repeat{
             upper_temp <- brank$knee
-            brank <- Calc_upper(dat_filter, brank$inflection + 100)
+            brank <- Calc_upper(dat_filter, 
+                                brank$inflection + step_size)
             if(brank$knee==upper_temp) break
         }
         
         if (is.null(upper_temp)) {
-            stop("Probably not enough barcodes to calculate knee point.")
+            stop("Probably not enough barcodes to calculate knee point.
+                 Consider a smaller lower threshold.")
         }
         upper <- upper_temp
     }
