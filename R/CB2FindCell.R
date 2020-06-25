@@ -159,16 +159,11 @@ CB2FindCell <- function(RawDat,
         
         brank <- Calc_upper(dat_filter, lower = lower)
         step_size <- (brank$knee-brank$inflection)/10
-        
-        
         #check convergence of knee point
         repeat{
             upper_temp <- brank$knee
-            new_lower <- brank$inflection + step_size
-            if(sum(colSums(dat_filter)> new_lower)<=3)
-                break
             brank <- Calc_upper(dat_filter, 
-                                new_lower)
+                                brank$inflection + step_size)
             if(brank$knee==upper_temp) break
         }
         
