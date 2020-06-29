@@ -148,11 +148,10 @@ CB2FindCell <- function(RawDat,
     if (GeneExpressionOnly) {
         is_extra_feature <- grepl(pattern = "TotalSeqB|Cell Multiplexing Oligo",
                                   rownames(RawDat))
-        
-        dat_filter <- FilterGB(RawDat[!is_extra_feature,],0,0)
     }else{
-        dat_filter <- FilterGB(RawDat,0,0) 
+        is_extra_feature <- rep(FALSE,nrow(RawDat))
     }
+    dat_filter <- FilterGB(RawDat[!is_extra_feature,],0,0)
 
     if (is.null(upper)) {
         
@@ -284,8 +283,9 @@ CB2FindCell <- function(RawDat,
     if(is.null(output_cl$barcode)){
         warning("Failed to construct any cluster. Skipping to Step 5.")
         if(verbose){
-            message("Raw data may not have enough barcodes for clustering.\n")
-            message("Also check for and remove outlier overexpressed gene.\n")
+            message("Raw data may not have enough barcodes for clustering.") 
+            message("Also check for and remove outlier overexpressed gene.")
+            message("Skipping to Step 5.\n")
         }
         cl_temp <- NULL
     } else{
@@ -385,7 +385,7 @@ CB2FindCell <- function(RawDat,
     } else{
         cand_barcode <- c(colnames(cbind(dat,B0)), 
                         colnames(upper_mat))
-        ED_out <- emptyDrops(RawDat[, cand_barcode], 
+        ED_out <- emptyDrops(RawDat[!is_extra_feature, cand_barcode], 
                     lower = lower, retain = upper)
         dat_temp$logLH <- ED_out$LogProb[seq_len(ncol(dat))]
         dat_temp$pval <- ED_out$PValue[seq_len(ncol(dat))]
