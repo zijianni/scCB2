@@ -10,7 +10,7 @@ CB2FindCell(
   FDR_threshold = 0.01,
   lower = 100,
   upper = NULL,
-  RemoveProtein = TRUE,
+  GeneExpressionOnly = TRUE,
   Ncores = 2,
   verbose = TRUE
 )
@@ -40,18 +40,19 @@ calculated using package \code{DropletUtils}'s method. If
 \code{upper = Inf}, no barcodes will be retained prior to testing. 
 If manually specified, it should be greater than pooling threshold.}
 
-\item{RemoveProtein}{Logical. Default: \code{TRUE}. For 10x Cell Ranger 
-version >=3, extra features (surface proteins) besides genes 
-are measured simultaneously. If \code{RemoveProtein = TRUE}, only genes 
+\item{GeneExpressionOnly}{Logical. Default: \code{TRUE}. For 10x Cell Ranger 
+version >=3, extra features (surface proteins, cell multiplexing oligos, etc) 
+besides genes are measured simultaneously. If 
+\code{GeneExpressionOnly = TRUE}, only genes 
 are used for testing. Removing extra features are recommended
 because the default pooling threshold (100) is chosen only for handling 
-gene expression. Protein expression level is hugely different
+gene expression. Extra features expression level is hugely different
 from gene expression level. If using the default pooling threshold 
-while keeping proteins, the estimated background distribution
+while keeping extra features, the estimated background distribution
 will be hugely biased and does not reflect the real background distribution 
 of empty droplets.}
 
-\item{Ncores}{Positive integer. Default: \code{detectCores() - 2}. 
+\item{Ncores}{Positive integer. Default: 2. 
 Number of cores for parallel computation.}
 
 \item{verbose}{Logical. Default: \code{TRUE}. If \code{verbose = TRUE}, 
@@ -87,14 +88,15 @@ This function supports parallel computation. \code{Ncores} is used to specify
 number of cores. 
 
 Under CellRanger version >=3, extra features other than genes are 
-simultaneously measured (e.g. surface protein). We recommend filtering 
-them out using \code{RemoveProtein = TRUE} because the measurement of 
-protein abundance is not in the same level as gene expression counts.
-If using the default pooling threshold while keeping proteins, the 
+simultaneously measured (e.g. surface protein, cell multiplexing oligo). 
+We recommend filtering them out using 
+\code{GeneExpressionOnly = TRUE} because the expression of 
+extra features is not in the same scale as gene expression counts.
+If using the default pooling threshold while keeping extra features, the 
 estimated background distribution will be hugely biased and does not 
 reflect the real background distribution of empty droplets. The resulting 
 matrix will contain lots of barcodes who have almost zero gene expression
-and relatively high protein expression, which are usually not useful for 
+and relatively high extra features expression, which are usually not useful for 
 RNA-Seq study.
 }
 \examples{
