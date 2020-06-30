@@ -148,7 +148,10 @@ CB2FindCell <- function(RawDat,
     if (GeneExpressionOnly) {
         is_extra_feature <- grepl(pattern = "TotalSeqB|Cell Multiplexing Oligo",
                                   rownames(RawDat))
-        message("Detected ",sum(is_extra_feature)," extra features to filter out.")
+        message("Detected ",sum(is_extra_feature)," extra features ",
+                "which won't be used during cell calling:")
+        message(paste(rownames(RawDat)[is_extra_feature],
+                      collapse = ", "))
     }else{
         is_extra_feature <- rep(FALSE,nrow(RawDat))
     }
