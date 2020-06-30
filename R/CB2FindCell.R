@@ -148,10 +148,13 @@ CB2FindCell <- function(RawDat,
     if (GeneExpressionOnly) {
         is_extra_feature <- grepl(pattern = "TotalSeqB|Cell Multiplexing Oligo",
                                   rownames(RawDat))
-        message("Detected ",sum(is_extra_feature)," extra features ",
-                "which won't be used during cell calling:")
-        message(paste(rownames(RawDat)[is_extra_feature],
-                      collapse = ", "))
+        if(verbose){
+            message("Detected ",sum(is_extra_feature)," extra features ",
+                    "which won't be used during cell calling.")
+            message(paste(rownames(RawDat)[is_extra_feature],
+                          collapse = ", "))
+        }
+
     }else{
         is_extra_feature <- rep(FALSE,nrow(RawDat))
     }
@@ -224,14 +227,15 @@ CB2FindCell <- function(RawDat,
         cor(x, null_prob)
     }
     
-    if (verbose)
-        message("Done.\n")
-    
+
     ####################estimate test statistic for all barcodes
     
-    if (verbose)
+    if (verbose){
+        message("Done.\n")
         message("(2/5) Calculating test statistics for barcodes...")
-    
+        
+    }
+        
     dat_Cor <-
         Calc_stat(dat,
                 size = 1000,
@@ -240,13 +244,13 @@ CB2FindCell <- function(RawDat,
     dat_temp <- data.frame(cbind(dat_Cor, colSums(dat)))
     #Here the test statistic is correlation, but 
     #we name it as logLH for step 5 use.
-    if (verbose)
     colnames(dat_temp) <- c("logLH", "count") 
-        message("Done.\n")
     
     ###############################construct clusters
     clust_mat <- NULL
+    
     if (verbose) {
+        message("Done.\n")
         message("(3/5) Constructing highly-correlated clusters...")
     }
     
@@ -293,8 +297,6 @@ CB2FindCell <- function(RawDat,
         }
         cl_temp <- NULL
     } else{
-        if (verbose)
-            message("Done.\n")
         ##############estimate test statistic for every cluster
         cl_Cor <- output_cl$stat
         
@@ -306,9 +308,11 @@ CB2FindCell <- function(RawDat,
         
         clust_b <- unlist(output_cl$barcode)
         ##############################cluster test
-        if (verbose)
+        if (verbose){
+            message("Done.\n")
             message("(4/5) Calculating empirical p-value for each cluster...")
-        
+        }
+                    
         cand_count <- sort(unique(cl_temp$count))
         cl <- makeCluster(Ncores)
         registerDoParallel(cl)
