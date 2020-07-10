@@ -28,18 +28,19 @@
 #' \code{upper = Inf}, no barcodes will be retained prior to testing. 
 #' If manually specified, it should be greater than pooling threshold. 
 #' 
-#' @param RemoveProtein Logical. Default: \code{TRUE}. For 10x Cell Ranger 
-#' version >=3, extra features (surface proteins) besides genes 
-#' are measured simultaneously. If \code{RemoveProtein = TRUE}, only genes 
+#' @param GeneExpressionOnly Logical. Default: \code{TRUE}. For 10x Cell Ranger 
+#' version >=3, extra features (surface proteins, cell multiplexing oligos, etc) 
+#' besides genes are measured simultaneously. If 
+#' \code{GeneExpressionOnly = TRUE}, only genes 
 #' are used for testing. Removing extra features are recommended
 #' because the default pooling threshold (100) is chosen only for handling 
-#' gene expression. Protein expression level is hugely different
+#' gene expression. Extra features expression level is hugely different
 #' from gene expression level. If using the default pooling threshold 
-#' while keeping proteins, the estimated background distribution
+#' while keeping extra features, the estimated background distribution
 #' will be hugely biased and does not reflect the real background distribution 
 #' of empty droplets.   
 #' 
-#' @param Ncores Positive integer. Default: \code{detectCores() - 2}. 
+#' @param Ncores Positive integer. Default: 2. 
 #' Number of cores for parallel computation.
 #' 
 #' @param verbose Logical. Default: \code{TRUE}. If \code{verbose = TRUE}, 
@@ -71,14 +72,15 @@
 #' number of cores. 
 #' 
 #' Under CellRanger version >=3, extra features other than genes are 
-#' simultaneously measured (e.g. surface protein). We recommend filtering 
-#' them out using \code{RemoveProtein = TRUE} because the measurement of 
-#' protein abundance is not in the same level as gene expression counts.
-#' If using the default pooling threshold while keeping proteins, the 
+#' simultaneously measured (e.g. surface protein, cell multiplexing oligo). 
+#' We recommend filtering them out using 
+#' \code{GeneExpressionOnly = TRUE} because the expression of 
+#' extra features is not in the same scale as gene expression counts.
+#' If using the default pooling threshold while keeping extra features, the 
 #' estimated background distribution will be hugely biased and does not 
 #' reflect the real background distribution of empty droplets. The resulting 
 #' matrix will contain lots of barcodes who have almost zero gene expression
-#' and relatively high protein expression, which are usually not useful for 
+#' and relatively high extra features expression, which are usually not useful for 
 #' RNA-Seq study.
 #' 
 #' @examples
@@ -114,7 +116,7 @@ CB2FindCell <- function(RawDat,
                         FDR_threshold = 0.01,
                         lower = 100,
                         upper = NULL,
-                        RemoveProtein = TRUE,
+                        GeneExpressionOnly = TRUE,
                         Ncores = 2,
                         verbose = TRUE) {
     time_begin <- Sys.time()
@@ -143,30 +145,41 @@ CB2FindCell <- function(RawDat,
         RawDat <- as(RawDat, "dgCMatrix")
     }
     
-    if (RemoveProtein) {
-        protein <- grep(pattern = "TotalSeqB", x = rownames(RawDat))
+    if (GeneExpressionOnly) {
+        is_extra_feature <- grepl(pattern = "TotalSeqB|Cell Multiplexing Oligo",
+                                  rownames(RawDat))
+        if(verbose){
+            message("Detected ",sum(is_extra_feature)," extra features ",
+                    "which won't be used during cell calling.")
+            message(paste(rownames(RawDat)[is_extra_feature],
+                          collapse = ", "))
+        }
+
     }else{
-        protein <- integer(0)
+        is_extra_feature <- rep(FALSE,nrow(RawDat))
     }
-    
-    if (length(protein) > 0) {
-        dat_filter <- FilterGB(RawDat[-protein,],0,0)
-    }else{
-        dat_filter <- FilterGB(RawDat,0,0) 
-    }
+    dat_filter <- FilterGB(RawDat[!is_extra_feature,],0,0)
 
     if (is.null(upper)) {
         
         brank <- Calc_upper(dat_filter, lower = lower)
+        step_size <- (brank$knee-brank$inflection)/10
+        
+        
         #check convergence of knee point
         repeat{
             upper_temp <- brank$knee
-            brank <- Calc_upper(dat_filter, brank$inflection + 100)
+            new_lower <- brank$inflection + step_size
+            if(sum(colSums(dat_filter)> new_lower)<=3)
+                break
+            brank <- Calc_upper(dat_filter, 
+                                new_lower)
             if(brank$knee==upper_temp) break
         }
         
         if (is.null(upper_temp)) {
-            stop("Probably not enough barcodes to calculate knee point.")
+            stop("Probably not enough barcodes to calculate knee point.
+                 Consider a smaller lower threshold.")
         }
         upper <- upper_temp
     }
@@ -182,7 +195,7 @@ CB2FindCell <- function(RawDat,
     bc <- colSums(dat_filter)
     if (any(bc >= upper)) {
         upper_cell <- names(bc)[bc >= upper]
-        upper_mat <- RawDat[, upper_cell]
+        upper_mat <- RawDat[, upper_cell, drop=FALSE]
         dat_filter <- FilterGB(dat_filter[,bc < upper], 0, 0)
     }else{
         upper_mat <- NULL
@@ -198,7 +211,9 @@ CB2FindCell <- function(RawDat,
     null_prob <- goodTuringProportions(null_count)[,1]
     c_prob <- null_prob
     
-    if (any(bc >= upper)) {
+    # Check entropy of large cells only when there are 
+    # at least 10 cells above the upper threshold
+    if (sum(bc >= upper)>=10) {
         upper_count <- rowSums(upper_mat[rownames(B0),])
         upper_prob <- goodTuringProportions(upper_count)[,1]
         
@@ -212,14 +227,15 @@ CB2FindCell <- function(RawDat,
         cor(x, null_prob)
     }
     
-    if (verbose)
-        message("Done.\n")
-    
+
     ####################estimate test statistic for all barcodes
     
-    if (verbose)
+    if (verbose){
+        message("Done.\n")
         message("(2/5) Calculating test statistics for barcodes...")
-    
+        
+    }
+        
     dat_Cor <-
         Calc_stat(dat,
                 size = 1000,
@@ -228,13 +244,13 @@ CB2FindCell <- function(RawDat,
     dat_temp <- data.frame(cbind(dat_Cor, colSums(dat)))
     #Here the test statistic is correlation, but 
     #we name it as logLH for step 5 use.
-    if (verbose)
     colnames(dat_temp) <- c("logLH", "count") 
-        message("Done.\n")
     
     ###############################construct clusters
     clust_mat <- NULL
+    
     if (verbose) {
+        message("Done.\n")
         message("(3/5) Constructing highly-correlated clusters...")
     }
     
@@ -275,13 +291,12 @@ CB2FindCell <- function(RawDat,
     if(is.null(output_cl$barcode)){
         warning("Failed to construct any cluster. Skipping to Step 5.")
         if(verbose){
-            message("Raw data may not have enough barcodes for clustering.\n")
-            message("Also check for and remove outlier overexpressed gene.\n")
+            message("Raw data may not have enough barcodes for clustering.") 
+            message("Also check for and remove outlier overexpressed gene.")
+            message("Skipping to Step 5.\n")
         }
         cl_temp <- NULL
     } else{
-        if (verbose)
-            message("Done.\n")
         ##############estimate test statistic for every cluster
         cl_Cor <- output_cl$stat
         
@@ -293,9 +308,11 @@ CB2FindCell <- function(RawDat,
         
         clust_b <- unlist(output_cl$barcode)
         ##############################cluster test
-        if (verbose)
+        if (verbose){
+            message("Done.\n")
             message("(4/5) Calculating empirical p-value for each cluster...")
-        
+        }
+                    
         cand_count <- sort(unique(cl_temp$count))
         cl <- makeCluster(Ncores)
         registerDoParallel(cl)
@@ -376,7 +393,7 @@ CB2FindCell <- function(RawDat,
     } else{
         cand_barcode <- c(colnames(cbind(dat,B0)), 
                         colnames(upper_mat))
-        ED_out <- emptyDrops(RawDat[, cand_barcode], 
+        ED_out <- emptyDrops(RawDat[!is_extra_feature, cand_barcode], 
                     lower = lower, retain = upper)
         dat_temp$logLH <- ED_out$LogProb[seq_len(ncol(dat))]
         dat_temp$pval <- ED_out$PValue[seq_len(ncol(dat))]
