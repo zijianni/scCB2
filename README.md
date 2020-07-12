@@ -4,9 +4,25 @@ Droplet-based single cell RNA-seq technologies provide a novel insight in transc
 
 **CB2** is a cluster-based approach for distinguishing true cells from background barcodes in droplet-based single cell RNA-seq experiments (especially for 10X Chromium output), while `scCB2` is its corresponding R package. It is based on clustering similar barcodes and calculating Monte-Carlo p-value for each cluster to test against background distribution. This cluster-level test outperforms single-barcode-level tests not only for high count barcodes, but also in dealing with low count barcodes and homogeneous sequencing library, while keeping FDR well controlled.
 
+This package has been accepted by Bioconductor. For more instructions, see [here](https://bioconductor.org/packages/3.12/bioc/html/scCB2.html).
+
 ## Installation
 
-Install via Github into R using `devtools`:
+Install via Bioconductor: 
+
+``
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+``
+``
+BiocManager::install(version='devel')
+``
+``
+BiocManager::install("scCB2")
+``
+
+
+Alternatively, install via Github using `devtools`:
 
 ``
 if(!requireNamespace("devtools", quietly = TRUE))
@@ -20,10 +36,9 @@ Note: This may take a few minutes for building vignettes. If you don't need vign
 
 After installing, you will find package vignettes by `vignette("scCB2")`.
 
-(coming soon) Install via Bioconductor: `BiocManager::install("scCB2")`
 
 ## Vignettes 
-[v0.99.22](https://htmlpreview.github.io/?https://github.com/zijianni/scCB2_temp_vignette/blob/master/scCB2.html)
+[v0.99.27](https://htmlpreview.github.io/?https://github.com/zijianni/scCB2_temp_vignette/blob/master/scCB2.html)
 
 
 
