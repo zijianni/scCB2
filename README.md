@@ -14,9 +14,11 @@ Install via Bioconductor:
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 ``
+
 ``
 BiocManager::install(version='devel')
 ``
+
 ``
 BiocManager::install("scCB2")
 ``
@@ -28,6 +30,7 @@ Alternatively, install via Github using `devtools`:
 if(!requireNamespace("devtools", quietly = TRUE))
     install.packages("devtools")
 ``
+
 ``
 devtools::install_github("zijianni/scCB2", build_manual = TRUE, build_vignettes = TRUE)
 ``
