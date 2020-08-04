@@ -591,7 +591,6 @@ ave_cor <- function(cor_list,size_cor) {
 #efficient correlation calculation of large sparse matrix
 # https://stackoverflow.com/a/5892652
 sparse_cor <- function(x){
-    memory.limit(size=10000)
     n <- nrow(x)
     
     cMeans <- colMeans(x)
