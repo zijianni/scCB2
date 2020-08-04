@@ -589,20 +589,25 @@ ave_cor <- function(cor_list,size_cor) {
 }
 
 #efficient correlation calculation of large sparse matrix
-sparse_cor <- function(x) {
-    
+# https://stackoverflow.com/a/5892652
+sparse_cor <- function(x){
+    memory.limit(size=10000)
     n <- nrow(x)
-    m <- ncol(x)
-    # non-empty rows
-    ii <- unique(x@i) + 1
-    Ex <- colMeans(x)
-    #centralize
-    nozero <- as.vector(x[ii, ]) - rep(Ex, each = length(ii))
-    covmat <- (crossprod(matrix(nozero, ncol = m)) +
-                crossprod(t(Ex)) * (n - length(ii))) / (n - 1)
-    sdvec <- sqrt(diag(covmat))
-    return(covmat / crossprod(t(sdvec)))
+    
+    cMeans <- colMeans(x)
+    cSums <- colSums(x)
+    
+    # Calculate the population covariance matrix.
+    # There's no need to divide by (n-1) as the std. dev is also calculated the same way.
+    # The code is optimized to minize use of memory and expensive operations
+    covmat <- tcrossprod(cMeans, (-2*cSums+n*cMeans))
+    crossp <- as.matrix(crossprod(x))
+    covmat <- covmat+crossp
+    
+    sdvec <- sqrt(diag(covmat)) # standard deviations of columns
+    covmat/crossprod(t(sdvec)) # correlation matrix
 }
+
 
 #combine results in foreach parallel computation
 cfun <- function(a, b) {
