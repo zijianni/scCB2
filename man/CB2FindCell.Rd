@@ -12,6 +12,7 @@ CB2FindCell(
   upper = NULL,
   GeneExpressionOnly = TRUE,
   Ncores = 2,
+  TopNGene = 30000,
   verbose = TRUE
 )
 }
@@ -54,6 +55,11 @@ of empty droplets.}
 
 \item{Ncores}{Positive integer. Default: 2. 
 Number of cores for parallel computation.}
+
+\item{TopNGene}{Positive integer. Default: 30000. 
+Number of top highly expressed genes to use. This threshold avoids 
+high number of false positives in ultra-high dimensional datasets, 
+e.g. 10x barnyard data.}
 
 \item{verbose}{Logical. Default: \code{TRUE}. If \code{verbose = TRUE}, 
 progressing messages will be printed.}

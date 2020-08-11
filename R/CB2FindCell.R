@@ -43,6 +43,11 @@
 #' @param Ncores Positive integer. Default: 2. 
 #' Number of cores for parallel computation.
 #' 
+#' @param TopNGene Positive integer. Default: 30000. 
+#' Number of top highly expressed genes to use. This threshold avoids 
+#' high number of false positives in ultra-high dimensional datasets, 
+#' e.g. 10x barnyard data.
+#' 
 #' @param verbose Logical. Default: \code{TRUE}. If \code{verbose = TRUE}, 
 #' progressing messages will be printed.
 #'
@@ -118,6 +123,7 @@ CB2FindCell <- function(RawDat,
                         upper = NULL,
                         GeneExpressionOnly = TRUE,
                         Ncores = 2,
+                        TopNGene = 30000,
                         verbose = TRUE) {
     time_begin <- Sys.time()
     
@@ -209,6 +215,16 @@ CB2FindCell <- function(RawDat,
     
     null_count <- rowSums(B0)
     null_prob <- goodTuringProportions(null_count)[,1]
+    
+    ##### Control dimension, keep top genes
+    gene_rank <- rank(-null_prob)
+    is_good_gene <- gene_rank<=TopNGene
+    B0 <- B0[is_good_gene,]
+    dat <- dat[is_good_gene,]
+    null_prob <- null_prob[is_good_gene]
+    
+    # Define probability distribution for simulating
+    # good clusters in step 3
     c_prob <- null_prob
     
     # Check entropy of large cells only when there are 

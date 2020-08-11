@@ -32,7 +32,7 @@ After installing, you will find package vignettes by `vignette("scCB2")`.
 
 
 ## Vignettes 
-[v0.99.27](https://htmlpreview.github.io/?https://github.com/zijianni/scCB2_temp_vignette/blob/master/scCB2.html)
+[Link to Bioconductor](https://bioconductor.org/packages/3.12/bioc/vignettes/scCB2/inst/doc/scCB2.html)
 
 
 
