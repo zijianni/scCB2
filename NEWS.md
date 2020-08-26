@@ -127,3 +127,9 @@
 ---------------------
 
 * Added thresholding of number of top genes to use in testing steps. This avoids high number of false positives in ultra-high dimensional datasets, e.g. 10x barnyard data. 
+
+## scCB2 0.99.31
+
+---------------------
+
+* Added extra filtering for barnyard data (a mixture of multiple species). 

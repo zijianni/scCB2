@@ -1,6 +1,6 @@
 Package: scCB2
-Version: 0.99.30
-Date: 2020/8/10
+Version: 0.99.31
+Date: 2020/8/26
 Title: CB2 improves power of cell detection in droplet-based single-cell RNA sequencing data 
 Authors@R: c(
     person("Zijian", "Ni", role = c("aut", "cre"), email = "zni25@wisc.edu"), 

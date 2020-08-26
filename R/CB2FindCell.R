@@ -154,6 +154,9 @@ CB2FindCell <- function(RawDat,
     if (GeneExpressionOnly) {
         is_extra_feature <- grepl(pattern = "TotalSeqB|Cell Multiplexing Oligo",
                                   rownames(RawDat))
+        if(all(is_extra_feature)){
+            stop("Input data is not gene expression data.")
+        }
         if(verbose){
             message("Detected ",sum(is_extra_feature)," extra features ",
                     "which won't be used during cell calling.")
@@ -207,7 +210,7 @@ CB2FindCell <- function(RawDat,
         upper_mat <- NULL
     }
     
-    #####remaining barcodes
+    ##### Remaining barcodes
     B0_bc <- names(bc)[bc <= lower]
     B1_bc <- names(bc)[(bc > lower & bc < upper)]
     B0 <- dat_filter[, B0_bc]
@@ -215,6 +218,13 @@ CB2FindCell <- function(RawDat,
     
     null_count <- rowSums(B0)
     null_prob <- goodTuringProportions(null_count)[,1]
+    
+    ##### Check if input data is barnyard data
+    if(is_barnyard(dat)){
+        message("Input data is likely to have multiple genomes.")
+        message("Automatically perform barnyard filtering.")
+        dat <- filter_barnyard(dat)
+    }
     
     ##### Control dimension, keep top genes
     gene_rank <- rank(-null_prob)
@@ -684,3 +694,38 @@ Calc_upper <- function(dat,lower){
     inflection <- 10^(y[right.edge])
     return(list(knee=round(knee),inflection=round(inflection)))
 }
+
+# Check if input data is barnyard sample (containing more than one genome)
+is_barnyard <- function(dat, barnyard_identifier = "_") {
+    barnyard_gene <- grepl(barnyard_identifier, rownames(dat))
+    return(all(barnyard_gene))
+}
+
+# Filter barnyard data based on proportion of UMIs in each species
+# Barcodes with mixed UMIs from different species indicates doublets 
+# and background barcodes.
+filter_barnyard <-
+    function(dat,
+             barnyard_identifier = "_",
+             threshold = 0.75) {
+        # Identify species
+        barnyard_prefix <- gsub("_.*", "", rownames(dat))
+        species <- unique(barnyard_prefix)
+        
+        # Calculate UMI counts under each species
+        species_counts <- matrix(nrow = ncol(dat), ncol = 0)
+        for (sp in species) {
+            sp_genes <- barnyard_prefix == sp
+            sp_counts <- colSums(dat[sp_genes, ])
+            species_counts <- cbind(species_counts, sp_counts)
+        }
+        colnames(species_counts) <- species
+        
+        # Calculate UMI proportion of each species for every barcode
+        total_counts <- rowSums(species_counts)
+        species_prop <- species_counts / total_counts
+        
+        # Filter barcodes based on max proportion
+        max_prop <- apply(species_prop, 1, max)
+        return(dat[, max_prop >= threshold])
+    }
