@@ -20,26 +20,9 @@ opts_chunk$set(error=FALSE, message=FALSE, warning=FALSE)
 
 # Introduction
 
-Droplet-based single-cell RNA sequencing (scRNA-seq) is a powerful and widely-used approach for profiling genome-wide gene expression 
-in individual cells. Current commercial droplet-based technologies such as 10X Genomics utilize gel beads, each containing 
-oligonucleotide indexes made up of bead-specific barcodes combined with unique molecular identifiers (UMIs) and oligo-dT tags 
-to prime polyadenylated RNA. Single cells of interest are combined with reagents in one channel of a microfluidic chip, 
-and gel beads in another, to form gel-beads in emulsion, or GEMs. Oligonucleotide indexes bind polyadenylated RNA within each GEM 
-reaction vesicle before gel beads are dissolved releasing the bound oligos into solution for reverse transcription. 
-By design, each resulting cDNA molecule contains a UMI and a GEM-specific barcode that, ideally,
-tags mRNA from an individual cell, but this is often not the case in practice.  To distinguish true cells from background barcodes in
-droplet-based single cell RNA-seq experiments, we introduce **CB2** and `scCB2`, its corresponding R package.
+Droplet-based single-cell RNA sequencing (scRNA-seq) is a powerful and widely-used approach for profiling genome-wide gene expression in individual cells. Current commercial droplet-based technologies such as 10X Genomics utilize gel beads, each containing oligonucleotide indexes made up of bead-specific barcodes combined with unique molecular identifiers (UMIs) and oligo-dT tags to prime polyadenylated RNA. Single cells of interest are combined with reagents in one channel of a microfluidic chip, and gel beads in another, to form gel-beads in emulsion, or GEMs. Oligonucleotide indexes bind polyadenylated RNA within each GEM reaction vesicle before gel beads are dissolved releasing the bound oligos into solution for reverse transcription. By design, each resulting cDNA molecule contains a UMI and a GEM-specific barcode that, ideally, tags mRNA from an individual cell, but this is often not the case in practice.  To distinguish true cells from background barcodes in droplet-based single cell RNA-seq experiments, we introduce **CB2** and `scCB2`, its corresponding R package.
 
-**CB2** extends the EmptyDrops approach by introducing a clustering step that groups similar barcodes and 
-then conducts a statistical test to identify groups with expression distributions that vary from the background.
-While advantages are expected in many settings, users will benefit from 
-noting that **CB2** does not test for doublets or multiplets and, consequently, some of the high count identifications 
-may consist of two or more cells. Methods for identifying multiplets may prove useful after applying **CB2**. 
-It is also important to note that any method for distinguishing cells from background barcodes is technically correct in 
-identifying low-quality cells given that damaged cells exhibit expression profiles that differ from the background. 
-Specifically, mitochondrial gene expression is often high in damaged cells.
-Such cells are typically not of interest in downstream analysis and should therefore be removed. 
-The GetCellMat function in `scCB2` may be used toward this end.
+**CB2** extends the EmptyDrops approach by introducing a clustering step that groups similar barcodes and then conducts a statistical test to identify groups with expression distributions that vary from the background. While advantages are expected in many settings, users will benefit from noting that **CB2** does not test for doublets or multiplets and, consequently, some of the high count identifications may consist of two or more cells. Methods for identifying multiplets may prove useful after applying **CB2**. It is also important to note that any method for distinguishing cells from background barcodes is technically correct in identifying low-quality cells given that damaged cells exhibit expression profiles that differ from the background. Specifically, mitochondrial gene expression is often high in damaged cells. Such cells are typically not of interest in downstream analysis and should therefore be removed. The GetCellMat function in `scCB2` can be used toward this end.
 
 # Quick Start
 
@@ -121,12 +104,28 @@ identical(mbrainSub, mbrainSub_2)
 
 If raw data is not from the 10x Chromium pipeline, a user may manually create the feature-by-barcode count matrix with rows representing genes and columns representing barcodes. Gene and barcode IDs should be unique. The format of the count matrix can be either a sparse matrix or standard matrix.
 
-## Run **CB2** to distinguish real cells from empty droplets
+## Choose an appropriate background cutoff
 
-The main function `CB2FindCell` takes a raw count matrix as input and returns real cells, test statistics, and p-values. Now we apply `CB2FindCell` on `mbrainSub`, controlling FDR at 0.01 level (Default), assuming all barcodes with total count less than or equal to 100 are background empty droplets (Default), using 2 cores parallel computation (Default: number of total cores in the machine minus 2). For detailed information, see `?CB2FindCell`.
+The key parameter of CB2 as well as other similar methods is the background cutoff, which divides barcodes into two groups: (1) small barcodes that are most likely to be background empty droplets; (2) the rest barcodes that can be either background or cell, and remain to be tested. Those small barcodes will be used to estimate a background distribution, which guides the identification of cells from background. It is crucial to have an unbiased estimation of the background distribution. 
+
+By default, the background cutoff is set to be 100, meaning all barcodes with total UMI counts less or equal to 100 are used to estimate the background distribution. Empirically, this setting has worked well in most real world datasets. However, for datasets with special structures, or with unexpectedly lower or higher number of detected cells, it is recommended to re-evaluate the choice of background cutoff.
+
+An appropriate background cutoff should be reasonably large to contain enough background information, but shouldn't be too large to mistakenly put real cells into the background group. Based on empirical knowledge, we recommend a background cutoff which (1) puts more than 90% barcodes into background, or (2) puts more than 10% UMI counts into background. This guarantees us to have enough information for an unbiased estimation of the background cutoff. Starting from 100, the smallest cutoff satisfying either condition is the recommended cutoff.
 
 ```{r}
-CBOut <- CB2FindCell(mbrainSub, Ncores = 2)
+check_cutoff <- CheckBackgroundCutoff(mbrainSub)
+check_cutoff$summary_table
+check_cutoff$recommended_cutoff
+```
+
+In this example, the default background cutoff 100 is appropriate as it puts more than 90% barcodes into background as well as more than 10% UMI counts into background. In general, we recommend always checking the background cutoff.
+
+## Run **CB2** to distinguish real cells from empty droplets
+
+The main function `CB2FindCell` takes a raw count matrix as input and returns real cells, test statistics, and p-values. Now we apply `CB2FindCell` on `mbrainSub`, controlling FDR at 0.01 level (Default), assuming all barcodes with total counts less than or equal to 100 are background empty droplets (Default), using 2 cores parallel computation (Default: 2). For detailed information, see `?CB2FindCell`.
+
+```{r}
+CBOut <- CB2FindCell(mbrainSub, FDR_threshold = 0.01, lower = 100, Ncores = 2)
 str(assay(CBOut)) # cell matrix
 str(metadata(CBOut)) # test statistics, p-values, etc
 ```

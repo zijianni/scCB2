@@ -1,6 +1,6 @@
 Package: scCB2
-Version: 0.99.31
-Date: 2020/8/26
+Version: 1.6.0
+Date: 2022/1/17
 Title: CB2 improves power of cell detection in droplet-based single-cell RNA sequencing data 
 Authors@R: c(
     person("Zijian", "Ni", role = c("aut", "cre"), email = "zni25@wisc.edu"), 
@@ -48,6 +48,6 @@ NeedsCompilation: yes
 VignetteBuilder: knitr
 Encoding: UTF-8
 SystemRequirements: C++11
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 URL: https://github.com/zijianni/scCB2
 BugReports: https://github.com/zijianni/scCB2/issues

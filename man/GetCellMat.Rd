@@ -5,24 +5,26 @@
 \title{Extract real cell matrix from \code{CB2FindCell} output and optionally
 filter out low-quality cells}
 \usage{
-GetCellMat(CBout, MTfilter = 1, MTgene = NULL)
+GetCellMat(CBout, MTfilter = 0.25, MTgene = NULL)
 }
 \arguments{
 \item{CBout}{Output object from \code{CB2FindCell}, or a sparse matrix 
 (for example, from \code{QuickCB2}).}
 
-\item{MTfilter}{Numeric value between 0 and 1. Default: \code{1} 
-(No filtering). For each barcode, if the proportion of mitochondrial 
+\item{MTfilter}{Numeric value between 0 and 1. Default: \code{0.25}.
+For each barcode, if the proportion of mitochondrial 
 gene expression exceeds \code{MTfilter}, this barcode will be filtered out.
-No barcode exceeds 100\% mitochondrial gene expression, thus the default
-(100\%) corresponds to no filtering. The proportion of mitochondrial 
+By default, cell barcodes with more than 25% mitochondrial UMI counts are 
+filtered out. Set \code{MTfilter = 1} for no filtering.
+
+The proportion of mitochondrial 
 gene expressions is usually a criterion for evaluating cell quality, 
 and is calculated using the scaled sum of all genes starting 
 with "MT-" (human) or "mt-" (mouse) if row names are gene symbols, 
 or customized mitochondrial genes specified by \code{MTgene}.}
 
 \item{MTgene}{Character vector. User may specify customized mitochondrial
-gene IDs to perform the filtering. This should correspond to a subset 
+gene names to perform the filtering. This should correspond to a subset 
 of row names in raw data.}
 }
 \value{
