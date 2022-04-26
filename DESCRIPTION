@@ -1,5 +1,5 @@
 Package: scCB2
-Version: 1.6.0
+Version: 1.7.0
 Date: 2022/1/17
 Title: CB2 improves power of cell detection in droplet-based single-cell RNA sequencing data 
 Authors@R: c(
