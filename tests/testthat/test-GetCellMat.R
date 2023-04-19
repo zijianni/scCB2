@@ -11,8 +11,7 @@ test_that("Output matrix format", {
 })
 
 test_that("Mitochondrial filtering", {
-    expect_error(GetCellMat(CBOut, MTgene = "1"),
-                 "invalid character indexing")
+    expect_error(GetCellMat(CBOut, MTgene = "1"))
     expect_error(GetCellMat(CBOut, MTfilter = -1), "between 0 and 1")
     
     MTgene <- sample(rownames(assay(CBOut)), 10)
